@@ -10,16 +10,18 @@ import torch
 
 # Customized validation loop
 @LOOPS.register_module()
-class CustomTrainLoop(EpochBasedTrainLoop):
+class MultiDomainTrainLoop(EpochBasedTrainLoop):
 
   def __init__(self, 
                 runner, 
+                a: int,
                 dataloader: Union[DataLoader, Dict], 
                 max_epochs: int, 
                 dataloader1: Union[DataLoader, Dict] = None,
                 val_begin: int = 1, 
                 val_interval: int = 1, 
                 dynamic_intervals: Optional[List[Tuple[int, int]]] = None) -> None:
+    
     super().__init__(runner, dataloader, max_epochs, val_begin, val_interval, dynamic_intervals)
 
 
@@ -62,6 +64,7 @@ class CustomTrainLoop(EpochBasedTrainLoop):
           #data_batch['inputs'] = data_batch1['inputs'] + data_batch2['inputs']
           data_batch['inputs'] = torch.cat((data_batch1['inputs'], data_batch2['inputs']), dim= 0)
 
+          #Concatenate data from multiple dataloader
           data_batch['data_samples'] = data_batch1['data_samples'] + data_batch2['data_samples']
 
           print("Shape of concatenated data:", data_batch['inputs'].shape)
@@ -69,6 +72,7 @@ class CustomTrainLoop(EpochBasedTrainLoop):
           print("--------------------------")
           print("TYPE OF DATA SAMPLES: ", type(data_batch1['data_samples']))
 
+          #Input to model to process
           self.run_iter(idx, data_batch)
           print("Done one iter with concatenated inputs")
 

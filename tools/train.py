@@ -153,9 +153,10 @@ def main():
         # build customized runner from the registry
         # if 'runner_type' is set in the cfg
         runner = RUNNERS.build(cfg)
-
     # start training
     runner.train()
+
+   
 
 
 if __name__ == '__main__':
