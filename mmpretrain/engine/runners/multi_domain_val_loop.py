@@ -41,27 +41,15 @@ class MultiDomainValLoop(ValLoop):
 
         metrics_all = {}
         for idx_domain, dataloader in enumerate(self.dataloaders):
-            # print("ONE DOMAIN IS EVALUATED", idx_domain)
             for idx, data_batch in enumerate(dataloader):
                 self.run_iter(idx, data_batch)
-                # print("Done with one iteration ValLoop!")
-                # break
 
             # compute metrics
             metrics = self.evaluator.evaluate(len(dataloader.dataset))
-            # print("TYPE OF metrics:", type(metrics))
-            # print("KEYS IN metrics:", metrics.keys())
-            # print("METRICS:",  metrics)
 
             for metric_name in metrics.keys():
-                # print(metric_name)
-                # print('{}_domain{}'.format(metric_name, idx_domain+1))
-                # print('domain{}/{}'.format(idx_domain, metric_name))
                 metrics_all['domain{}/{}'.format(idx_domain + 1, metric_name)] = metrics[metric_name]
 
-        # metrics = {'dumb_metric': -1}
-        # print(metrics_all)
-        
         # ValLoop implementation
         if self.val_loss:
             loss_dict = _parse_losses(self.val_loss, 'val')
