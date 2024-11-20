@@ -69,7 +69,7 @@ class MultiDomainTrainLoop(EpochBasedTrainLoop):
         for idx in range(self.min_dataloader_len):
           data = []
           for idx_domain in range(self.n_domains):
-            data.append(dataloaders_iter[idx_domain].next())
+            data.append(next(dataloaders_iter[idx_domain]))
 
           #data_batch['inputs']: tensor, shape [D*B, C, H, w], first dim in domain order
           #data_batch[data_samples]: list, in domain order, e.g. [d1, d2, d3]
