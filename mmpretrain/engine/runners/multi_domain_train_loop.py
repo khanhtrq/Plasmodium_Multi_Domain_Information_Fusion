@@ -24,15 +24,6 @@ class MultiDomainTrainLoop(EpochBasedTrainLoop):
     
     super().__init__(runner, dataloader, max_epochs, val_begin, val_interval, dynamic_intervals)
 
-    # if isinstance(dataloader1, dict):
-    #   self.dataloader1 = runner.build_dataloader(dataloader1, seed=runner.seed)
-    # else:
-    #   self.dataloader1 = dataloader1
-
-    # print("TYPE OF TWO DATA LOADERS:")
-    # print(type(self.dataloader))
-    # print(type(self.dataloader1))
-
     self.n_domains = len(dataloaders_multi_domain)
     self.dataloaders = [] #List of all dataloaders
     self.min_dataloader_len = float('inf')

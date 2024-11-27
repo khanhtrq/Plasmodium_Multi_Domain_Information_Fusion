@@ -13,10 +13,13 @@ from .visual_grounding_eval import VisualGroundingMetric
 from .voc_multi_label import VOCAveragePrecision, VOCMultiLabelMetric
 from .vqa import ReportVQA, VQAAcc
 
+from .false_classification import FalseClassification
+
 __all__ = [
     'Accuracy', 'SingleLabelMetric', 'MultiLabelMetric', 'AveragePrecision',
     'MultiTasksMetric', 'VOCAveragePrecision', 'VOCMultiLabelMetric',
     'ConfusionMatrix', 'RetrievalRecall', 'VQAAcc', 'ReportVQA', 'COCOCaption',
     'VisualGroundingMetric', 'ScienceQAMetric', 'GQAAcc', 'NocapsSave',
-    'RetrievalAveragePrecision', 'ShapeBiasMetric', 'ANLS'
+    'RetrievalAveragePrecision', 'ShapeBiasMetric', 'ANLS',
+    'FalseClassification'
 ]
