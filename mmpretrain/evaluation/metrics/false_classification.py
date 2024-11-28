@@ -9,20 +9,22 @@ from mmengine.evaluator import BaseMetric
 
 from mmpretrain.registry import METRICS
 
+import os
+
+CLASS_NAMES = ['Ring', 'Trophozoite', 'Schizont', 'Gametocyte', 'HealthyRBC', 'Other', 'Difficult']
+
 
 @METRICS.register_module()
 class FalseClassification(BaseMetric):
     def __init__(self,
-                num_classes: Optional[int] = None,
-                collect_device: str = 'cpu',
-                prefix: Optional[str] = None) -> None:
+                 num_classes: Optional[int] = None,
+                 collect_device: str = 'cpu',
+                 prefix: Optional[str] = None) -> None:
         
         super().__init__(collect_device, prefix)
-        self.num_classes = 6 #num_classes
+        self.num_classes = num_classes #num_classes
     
     def process(self, data_batch, data_samples: Sequence[dict]) -> None:
-        
-
         for data_sample in data_samples:
             if 'pred_score' in data_sample:
                 pred_score = data_sample['pred_score']
@@ -36,21 +38,32 @@ class FalseClassification(BaseMetric):
                 'pred_label': pred_label,
                 'gt_label': data_sample['gt_label'],
             })
-
-            print(data_sample)
-            break
         
     
     def compute_metrics(self, results: list) -> dict:
         
-        false_classification = np.empty((self.num_classes, self.num_classes), dtype=object)
-
+        # false_classification = np.empty((self.num_classes, self.num_classes), dtype=object)
+        
+        #dict: {ground_truth}{prediction}
+        false_classification = {}
+        for i in range(self.num_classes):
+            false_classification[i] = {}
+            for j in range(self.num_classes):
+                false_classification[i][j] = []
+        
         for sample in results:
-            if sample['gt_label'] != sample['pred_label']:
-                if false_classification[sample['gt_label'], sample['pred_label']] is None:
-                    false_classification[sample['gt_label'], sample['pred_label']] = [sample['img_path']]
-                else:      
-                    false_classification[sample['gt_label'], sample['pred_label']].append(sample['img_path'])            
+            gt_label = sample['gt_label'].item()
+            pred_label = sample['pred_label'].item()
+            
+            #Save all classification 
+            # if gt_label != pred_label:
+                # Save false classificaiton image
+                # Folder structure: Ground truth - Prediction 
+            false_classification[gt_label][pred_label].append(sample['img_path'])
 
+                # if false_classification[sample['gt_label'], sample['pred_label']] is None:
+                #     false_classification[sample['gt_label'], sample['pred_label']] = [sample['img_path']]
+                # else:      
+                #     false_classification[sample['gt_label'], sample['pred_label']].append(sample['img_path'])            
 
         return {'false_classification': false_classification}

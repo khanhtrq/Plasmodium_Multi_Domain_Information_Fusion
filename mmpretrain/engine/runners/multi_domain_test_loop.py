@@ -8,6 +8,13 @@ from mmengine.evaluator import Evaluator
 from torch.utils.data import DataLoader
 import torch
 
+import os
+
+import shutil
+
+CLASS_NAMES = ['Ring', 'Trophozoite', 'Schizont', 'Gametocyte', 'HealthyRBC', 'Other', 'Difficult']
+DOMAIN_NAMES = ['OurPlasmodium', 'BBBC041', 'IMLMalaria']
+
 @LOOPS.register_module()
 class MultiDomainTestLoop(TestLoop):
     def __init__(self,
@@ -37,6 +44,8 @@ class MultiDomainTestLoop(TestLoop):
 
         # clear test loss
         self.test_loss.clear()
+
+        #Khanh implementation for multi-domain evaluation 
         metrics_all = {}
         for idx_domain, dataloader in enumerate(self.dataloaders):
             for idx, data_batch in enumerate(dataloader):
@@ -46,16 +55,40 @@ class MultiDomainTestLoop(TestLoop):
             metrics = self.evaluator.evaluate(len(dataloader.dataset))
 
             for metric_name in metrics.keys():
-                metrics_all['domain{}/{}'.format(idx_domain + 1, metric_name)] = metrics[metric_name]
-
+                metrics_all['{}/{}'.format(DOMAIN_NAMES[idx_domain], metric_name)] = metrics[metric_name]
 
         if self.test_loss:
             loss_dict = _parse_losses(self.test_loss, 'test')
             metrics.update(loss_dict)
-
+        
+        #Copying false classification cases
+        metrics_all = self.save_false_classification(metrics_all)
+                                    
         self.runner.call_hook('after_test_epoch', metrics=metrics_all)
         self.runner.call_hook('after_test')
         return metrics
+
+    def save_false_classification(self, metrics_all):
+        for idx_domain in range(len(self.dataloaders)):
+            metric_name = '{}/{}'.format(DOMAIN_NAMES[idx_domain], 'false_classification')
+            if metric_name in metrics_all.keys():
+                for gt in metrics_all[metric_name]:
+                    for pred in metrics_all[metric_name][gt]:
+                        path = os.path.join(self.runner.work_dir, 'false_classification', 
+                                            DOMAIN_NAMES[idx_domain], CLASS_NAMES[gt], 
+                                            CLASS_NAMES[pred])
+                        os.makedirs(path, exist_ok=True)
+
+                        for i in range(len(metrics_all[metric_name][gt][pred])):
+                            print(metrics_all[metric_name][gt][pred][i])
+                            print(os.path.join(path, '{}.jpg'.format(i)))
+
+                            img_path = metrics_all[metric_name][gt][pred][i]
+                            shutil.copy(img_path, os.path.join(path, '{}.jpg'.format(i)))        
+                
+                # If original cropped cells are not needed
+                metrics_all.pop(metric_name)
+        return metrics_all
 
 
 def _parse_losses(losses: Dict[str, HistoryBuffer],
