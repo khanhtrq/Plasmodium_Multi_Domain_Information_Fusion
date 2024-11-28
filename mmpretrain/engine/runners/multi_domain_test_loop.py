@@ -86,6 +86,8 @@ class MultiDomainTestLoop(TestLoop):
                             img_path = metrics_all[metric_name][gt][pred][i]
                             shutil.copy(img_path, os.path.join(path, '{}.jpg'.format(i)))        
                 
+                            if (gt == pred) and (gt == 4) and (i == 30):
+                                break
                 # If original cropped cells are not needed
                 metrics_all.pop(metric_name)
         return metrics_all
