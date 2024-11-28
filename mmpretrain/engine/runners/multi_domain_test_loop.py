@@ -80,8 +80,8 @@ class MultiDomainTestLoop(TestLoop):
                         os.makedirs(path, exist_ok=True)
 
                         for i in range(len(metrics_all[metric_name][gt][pred])):
-                            print(metrics_all[metric_name][gt][pred][i])
-                            print(os.path.join(path, '{}.jpg'.format(i)))
+                            # print(metrics_all[metric_name][gt][pred][i])
+                            # print(os.path.join(path, '{}.jpg'.format(i)))
 
                             img_path = metrics_all[metric_name][gt][pred][i]
                             shutil.copy(img_path, os.path.join(path, '{}.jpg'.format(i)))        
