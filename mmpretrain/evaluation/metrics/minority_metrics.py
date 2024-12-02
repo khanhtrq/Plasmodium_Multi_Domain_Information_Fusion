@@ -50,18 +50,18 @@ class MinorityMetrics(BaseMetric):
             torch.cat(gt_labels),
             num_classes=self.num_classes)
 
-        minority_metrics = {}
+        precision_recall_metrics = {}
         for i in range(self.num_classes):
             true_positives = confusion_matrix[i, i]
             false_positives = sum(confusion_matrix[:, i]) - true_positives
             false_negatives = sum(confusion_matrix[i, :]) - true_positives
             
-            # Calculate minority_metrics
+            # Calculate precision_recall_metrics
             precision_i = true_positives / (true_positives + false_positives) if (true_positives + false_positives) != 0 else 0
             recall_i = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) != 0 else 0
             
-            minority_metrics['minority_metrics/{}'.format(CLASS_NAMES[i])] = precision_i
-            minority_metrics['minority_metrics/{}'.format(CLASS_NAMES[i])] = recall_i
+            precision_recall_metrics['precision/{}'.format(CLASS_NAMES[i])] = precision_i
+            precision_recall_metrics['recall/{}'.format(CLASS_NAMES[i])] = recall_i
         
         parasitized_correct = 0
         parasitized_recall = 0
@@ -71,7 +71,7 @@ class MinorityMetrics(BaseMetric):
             parasitized_correct += confusion_matrix[i, i]
             parasitized_recall += np.sum(confusion_matrix[i, :])
             parasitized_precision += np.sum(confusion_matrix[:, i])
-        minority_metrics['minority_metrics/parasitized'] = parasitized_precision / parasitized_correct
-        minority_metrics['minority_metrics/parasitized'] = parasitized_recall / parasitized_correct
+        precision_recall_metrics['precision/parasitized'] = parasitized_precision / parasitized_correct
+        precision_recall_metrics['recall/parasitized'] = parasitized_recall / parasitized_correct
 
-        return minority_metrics
+        return precision_recall_metrics
