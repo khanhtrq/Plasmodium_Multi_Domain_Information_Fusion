@@ -8,6 +8,10 @@ from mmengine.evaluator import Evaluator
 from torch.utils.data import DataLoader
 import torch
 
+CLASS_NAMES = ['Ring', 'Trophozoite', 'Schizont', 'Gametocyte', 
+               'HealthyRBC', 'Other', 'Difficult']
+DOMAIN_NAMES = ['OurPlasmodium', 'BBBC041', 'IMLMalaria']
+
 @LOOPS.register_module()
 class MultiDomainValLoop(ValLoop):
     def __init__(self,
@@ -15,6 +19,7 @@ class MultiDomainValLoop(ValLoop):
                  dataloader: Union[DataLoader, Dict],
                  evaluator: Union[Evaluator, Dict, List],
                  dataloaders_multi_domain: List[Union[DataLoader, Dict]] = [],
+                 domain_names: List = None, #List of domain names according to dataloaders
                  fp16: bool = False) -> None:
         
         super().__init__(runner, dataloader, evaluator)
@@ -28,7 +33,11 @@ class MultiDomainValLoop(ValLoop):
                 self.dataloaders.append(runner.build_dataloader(dataloader, seed=runner.seed))
             else:
                 self.dataloaders.append(dataloader)
-
+        
+        if domain_names is None: 
+            self.domain_names = DOMAIN_NAMES
+        else:
+            self.domain_names = domain_names
     
     def run(self) -> dict:
         """Launch validation."""
@@ -39,6 +48,7 @@ class MultiDomainValLoop(ValLoop):
         # clear val loss
         self.val_loss.clear()
 
+        #Khanh implementation for multi-domain evaluation 
         metrics_all = {}
         for idx_domain, dataloader in enumerate(self.dataloaders):
             for idx, data_batch in enumerate(dataloader):
@@ -46,10 +56,10 @@ class MultiDomainValLoop(ValLoop):
 
             # compute metrics
             metrics = self.evaluator.evaluate(len(dataloader.dataset))
-
+            
             for metric_name in metrics.keys():
-                metrics_all['domain{}/{}'.format(idx_domain + 1, metric_name)] = metrics[metric_name]
-
+                metrics_all['{}/{}'.format(self.domain_names[idx_domain], metric_name)] = metrics[metric_name]
+        
         # ValLoop implementation
         if self.val_loss:
             loss_dict = _parse_losses(self.val_loss, 'val')
