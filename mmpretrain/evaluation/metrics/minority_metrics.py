@@ -71,7 +71,7 @@ class MinorityMetrics(BaseMetric):
             parasitized_correct += confusion_matrix[i, i]
             parasitized_recall += sum(confusion_matrix[i, :])
             parasitized_precision += sum(confusion_matrix[:, i])
-        precision_recall_metrics['precision/parasitized'] = parasitized_precision / parasitized_correct
-        precision_recall_metrics['recall/parasitized'] = parasitized_recall / parasitized_correct
+        precision_recall_metrics['precision/parasitized'] = parasitized_correct / parasitized_precision
+        precision_recall_metrics['recall/parasitized'] = parasitized_correct / parasitized_recall
 
         return precision_recall_metrics
