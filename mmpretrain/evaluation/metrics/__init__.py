@@ -14,6 +14,7 @@ from .voc_multi_label import VOCAveragePrecision, VOCMultiLabelMetric
 from .vqa import ReportVQA, VQAAcc
 
 from .false_classification import FalseClassification
+from .minority_metrics import MinorityMetrics
 
 __all__ = [
     'Accuracy', 'SingleLabelMetric', 'MultiLabelMetric', 'AveragePrecision',
@@ -21,5 +22,5 @@ __all__ = [
     'ConfusionMatrix', 'RetrievalRecall', 'VQAAcc', 'ReportVQA', 'COCOCaption',
     'VisualGroundingMetric', 'ScienceQAMetric', 'GQAAcc', 'NocapsSave',
     'RetrievalAveragePrecision', 'ShapeBiasMetric', 'ANLS',
-    'FalseClassification'
+    'FalseClassification', 'MinorityMetrics'
 ]

@@ -16,7 +16,7 @@ CLASS_NAMES = ['Ring', 'Trophozoite', 'Schizont', 'Gametocyte', 'HealthyRBC', 'O
 
 
 @METRICS.register_module()
-class FalseClassification(BaseMetric):
+class MinorityMetrics(BaseMetric):
     def __init__(self,
                  num_classes: Optional[int] = None,
                  collect_device: str = 'cpu',
