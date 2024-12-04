@@ -113,6 +113,8 @@ class MultiDomainTrainLoop(EpochBasedTrainLoop):
           total_sum += images.sum([0, 2, 3])  # Sum over batch, height, width
           total_sum_squared += (images ** 2).sum([0, 2, 3])
 
+          print("TOTAL SUM SQUARE:", total_sum_squared)
+
     # Calculate mean and std
     mean = total_sum / num_pixels
     std = (total_sum_squared / num_pixels - mean ** 2).sqrt()
