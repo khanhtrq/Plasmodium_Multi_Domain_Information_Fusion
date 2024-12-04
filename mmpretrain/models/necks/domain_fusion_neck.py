@@ -30,6 +30,8 @@ class MultiDomainInformationFusion(BaseModule):
         self.gcn_conv1 = GCNConv(input_dim, hidden_dim)  # First GCN layer
         self.gcn_conv2 = GCNConv(hidden_dim, output_dim)  # Second GCN layer
 
+        self.weight_head = nn.Conv2d(input_dim, input_dim, kernel_size=(1, 1))
+
         '''
         self.agent_nodes: Tensor, shape (n_domains, n_agent_nodes = n_classes)
         self.batch_size: information to know which samples are from which domain
@@ -39,7 +41,7 @@ class MultiDomainInformationFusion(BaseModule):
         
 
     def forward(self, instance_feat: torch.Tensor, 
-                kn_graph: torch.Tensor,
+                kn_graph: torch.Tensor = None,
                 data_samples = None):
         """
         Input:
@@ -68,6 +70,8 @@ class MultiDomainInformationFusion(BaseModule):
         instance_feat = self.gap(instance_feat)
         instance_feat = instance_feat.view(instance_feat.size(0), -1)
         print("SHAPE AFTER POOLING:", instance_feat.shape)
+
+        self.agent_feat(instance_feat)
  
         kn_graph = torch.tensor([[0],
                            [1]], dtype=torch.long)
@@ -82,7 +86,7 @@ class MultiDomainInformationFusion(BaseModule):
         print("SHAPE OF OUTPUT OF GCN MULTI DOMAIN FUSION:", instance_feat.shape)
         return tuple([instance_feat])
     
-    def agent_feat(instance_feat: torch.Tensor):
+    def agent_feat(self, instance_feat: torch.Tensor):
         '''
         input: instance features 
         output: agent nodes for current iteration
@@ -91,7 +95,10 @@ class MultiDomainInformationFusion(BaseModule):
 
         instance_feat --> weight_head --> instance weight
         '''
-        pass
+        
+        weight = self.weight_head(instance_feat)
+        print("SHAPE OF WIEGHT:", weight.shape)
+
 
     def ema():
         '''

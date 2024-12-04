@@ -52,30 +52,32 @@ class MultiDomainTrainLoop(EpochBasedTrainLoop):
           self.runner.call_hook('after_train_epoch')
           self._epoch += 1
 
-        # """Iterate one epoch."""
-        # self.runner.call_hook('before_train_epoch')
-        # self.runner.model.train()
+          return
 
-        # #dataloader --> iterable dataloader
-        # dataloaders_iter = []
-        # for dataloader in self.dataloaders:
-        #    dataloaders_iter.append(iter(dataloader))
+        """Iterate one epoch."""
+        self.runner.call_hook('before_train_epoch')
+        self.runner.model.train()
+
+        #dataloader --> iterable dataloader
+        dataloaders_iter = []
+        for dataloader in self.dataloaders:
+           dataloaders_iter.append(iter(dataloader))
         
-        # #for one epoch, number of iterations is defined by the smallest dataloader
-        # for idx in range(self.min_dataloader_len):
-        #   data = []
-        #   for idx_domain in range(self.n_domains):
-        #     data.append(next(dataloaders_iter[idx_domain]))
+        #for one epoch, number of iterations is defined by the smallest dataloader
+        for idx in range(self.min_dataloader_len):
+          data = []
+          for idx_domain in range(self.n_domains):
+            data.append(next(dataloaders_iter[idx_domain]))
 
-        #   #data_batch['inputs']: tensor, shape [D*B, C, H, w], first dim in domain order
-        #   #data_batch[data_samples]: list, in domain order, e.g. [d1, d2, d3]
-        #   data_batch = {}
-        #   data_batch['inputs'] = torch.cat([d['inputs'] for d in data], dim=0)
-        #   data_batch['data_samples'] = []
-        #   for d in data:
-        #     data_batch['data_samples'].extend(d['data_samples'])
+          #data_batch['inputs']: tensor, shape [D*B, C, H, w], first dim in domain order
+          #data_batch[data_samples]: list, in domain order, e.g. [d1, d2, d3]
+          data_batch = {}
+          data_batch['inputs'] = torch.cat([d['inputs'] for d in data], dim=0)
+          data_batch['data_samples'] = []
+          for d in data:
+            data_batch['data_samples'].extend(d['data_samples'])
   
-        #   self.run_iter(idx, data_batch)
+          self.run_iter(idx, data_batch)
 
         # -------------
         # Original EpochBasedTrainLoop
@@ -96,6 +98,7 @@ class MultiDomainTrainLoop(EpochBasedTrainLoop):
     #print("LENGHT OF DATALODER:", len(dataloader_all))
 
     for data in dataloader_all:  # Loop over the dataset
+        print("Processed samples: {}".format(num_samples))
         # Batch size, channels, height, width
 
         images = torch.cat([d['inputs'] for d in data], dim=0)
