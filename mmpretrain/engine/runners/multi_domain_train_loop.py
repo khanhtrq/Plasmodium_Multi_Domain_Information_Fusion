@@ -115,6 +115,7 @@ class MultiDomainTrainLoop(EpochBasedTrainLoop):
 
     print("TOTAL SUM SQUARE:", total_sum_squared)
     print("NUMBER OF PIXELS:", num_pixels)
+    print('TOTAL SUM:', total_sum)
     # Calculate mean and std
     mean = total_sum / num_pixels
     print((total_sum_squared / num_pixels - mean ** 2))
