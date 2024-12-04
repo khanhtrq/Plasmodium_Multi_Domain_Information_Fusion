@@ -86,9 +86,6 @@ class MultiDomainTrainLoop(EpochBasedTrainLoop):
         self._epoch += 1
 
   def normalization_coefficients(self):
-
-    print("NORMALIZATION")
-
     # Initialize variables
     total_sum = torch.zeros(3, dtype=torch.float64)
     total_sum_squared = torch.zeros(3, dtype=torch.float64)
@@ -100,25 +97,20 @@ class MultiDomainTrainLoop(EpochBasedTrainLoop):
     for dataloader in self.dataloaders:
       for data in dataloader:  # Loop over the dataset
           # Batch size, channels, height, width
-
-          images = data['inputs']
+          images = data['inputs'].to(torch.float64)
           batch_size, channels, height, width = images.shape
 
           # Update pixel count
           num_samples += batch_size
           num_pixels += batch_size * height * width
 
-
           # Sum and squared sum
           total_sum += images.sum([0, 2, 3])  # Sum over batch, height, width
           total_sum_squared += (images ** 2).sum([0, 2, 3])
 
-    print("TOTAL SUM SQUARE:", total_sum_squared)
-    print("NUMBER OF PIXELS:", num_pixels)
-    print('TOTAL SUM:', total_sum)
+  
     # Calculate mean and std
     mean = total_sum / num_pixels
-    print((total_sum_squared / num_pixels - mean ** 2))
     std = (total_sum_squared / num_pixels - mean ** 2).sqrt()
 
     print("Total number of samples:", num_samples)
