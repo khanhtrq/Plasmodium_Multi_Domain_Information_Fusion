@@ -90,7 +90,7 @@ class MultiDomainTrainLoop(EpochBasedTrainLoop):
     print("NORMALIZATION")
 
     # Initialize variables
-    total_sum = torch.zeros(3)
+    total_sum = torch.zeros(3, dtype=torch.float64)
     total_sum_squared = torch.zeros(3, dtype=torch.float64)
     num_samples = 0
     num_pixels = 0
