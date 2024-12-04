@@ -117,6 +117,7 @@ class MultiDomainTrainLoop(EpochBasedTrainLoop):
 
     # Calculate mean and std
     mean = total_sum / num_pixels
+    print((total_sum_squared / num_pixels - mean ** 2))
     std = (total_sum_squared / num_pixels - mean ** 2).sqrt()
 
     print("Total number of samples:", num_samples)
