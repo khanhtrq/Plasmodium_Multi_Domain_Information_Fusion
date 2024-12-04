@@ -97,6 +97,8 @@ class MultiDomainInformationFusion(BaseModule):
         '''
         
         weight = self.weight_head(instance_feat)
+        #Shape of wieght: (Batch, feature_dim)
+        #Normalize batch dimension --> sum by batch dim equals to 1
         print("SHAPE OF WIEGHT:", weight.shape)
 
 
