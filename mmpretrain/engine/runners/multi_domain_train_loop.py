@@ -89,10 +89,6 @@ class MultiDomainTrainLoop(EpochBasedTrainLoop):
 
     print("NORMALIZATION")
 
-    dataloader_all = chain(dataloader for dataloader in self.dataloaders)
-
-    print('AFTER DATALOADER CHAINED')
-
     # Initialize variables
     total_sum = torch.zeros(3)
     total_sum_squared = torch.zeros(3)
@@ -101,21 +97,22 @@ class MultiDomainTrainLoop(EpochBasedTrainLoop):
 
     #print("LENGHT OF DATALODER:", len(dataloader_all))
 
-    for data in dataloader_all:  # Loop over the dataset
-        print("Processed samples: {}".format(num_samples))
-        # Batch size, channels, height, width
+    for dataloader in self.dataloaders:
+      for data in dataloader:  # Loop over the dataset
+          print("Processed samples: {}".format(num_samples))
+          # Batch size, channels, height, width
 
-        images = torch.cat([d['inputs'] for d in data], dim=0)
-        batch_size, channels, height, width = images.shape
+          images = torch.cat([d['inputs'] for d in data], dim=0)
+          batch_size, channels, height, width = images.shape
 
-        # Update pixel count
-        num_samples += batch_size
-        num_pixels += batch_size * height * width
+          # Update pixel count
+          num_samples += batch_size
+          num_pixels += batch_size * height * width
 
 
-        # Sum and squared sum
-        total_sum += images.sum([0, 2, 3])  # Sum over batch, height, width
-        total_sum_squared += (images ** 2).sum([0, 2, 3])
+          # Sum and squared sum
+          total_sum += images.sum([0, 2, 3])  # Sum over batch, height, width
+          total_sum_squared += (images ** 2).sum([0, 2, 3])
 
     # Calculate mean and std
     mean = total_sum / num_pixels
