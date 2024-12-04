@@ -102,7 +102,7 @@ class MultiDomainTrainLoop(EpochBasedTrainLoop):
           print("Processed samples: {}".format(num_samples))
           # Batch size, channels, height, width
 
-          images = torch.cat([d['inputs'] for d in data], dim=0)
+          images = data['inputs']
           batch_size, channels, height, width = images.shape
 
           # Update pixel count
