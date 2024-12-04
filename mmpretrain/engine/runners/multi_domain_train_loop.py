@@ -99,7 +99,6 @@ class MultiDomainTrainLoop(EpochBasedTrainLoop):
 
     for dataloader in self.dataloaders:
       for data in dataloader:  # Loop over the dataset
-          print("Processed samples: {}".format(num_samples))
           # Batch size, channels, height, width
 
           images = data['inputs']
