@@ -87,7 +87,11 @@ class MultiDomainTrainLoop(EpochBasedTrainLoop):
 
   def normalization_coefficients(self):
 
+    print("NORMALIZATION")
+
     dataloader_all = chain(dataloader for dataloader in self.dataloaders)
+
+    print('AFTER DATALOADER CHAINED')
 
     # Initialize variables
     total_sum = torch.zeros(3)

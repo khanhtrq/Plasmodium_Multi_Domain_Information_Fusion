@@ -30,7 +30,7 @@ class MultiDomainInformationFusion(BaseModule):
         self.gcn_conv1 = GCNConv(input_dim, hidden_dim)  # First GCN layer
         self.gcn_conv2 = GCNConv(hidden_dim, output_dim)  # Second GCN layer
 
-        self.weight_head = nn.Conv2d(input_dim, input_dim, kernel_size=(1, 1))
+        self.weight_head = nn.Linear(input_dim, input_dim)
 
         '''
         self.agent_nodes: Tensor, shape (n_domains, n_agent_nodes = n_classes)
