@@ -101,7 +101,7 @@ class MultiDomainTestLoop(TestLoop):
                             metrics_all[metric_name][gt][pred] = []
 
                 # If original cropped cells are not needed
-                metrics_all.pop(metric_name)
+                # metrics_all.pop(metric_name)
         return metrics_all
 
 
