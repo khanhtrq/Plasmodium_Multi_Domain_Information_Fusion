@@ -78,6 +78,7 @@ class MultiDomainTestLoop(TestLoop):
     def save_false_classification(self, metrics_all):
         for idx_domain in range(len(self.dataloaders)):
             metric_name = '{}/{}'.format(self.domain_names[idx_domain], 'false_classification')
+            
             if metric_name in metrics_all.keys():
                 for gt in metrics_all[metric_name]:
                     for pred in metrics_all[metric_name][gt]:
@@ -95,6 +96,10 @@ class MultiDomainTestLoop(TestLoop):
                 
                             if (gt == pred) and (gt == 4) and (i == 30):
                                 break
+                        
+                        if gt == pred:
+                            metrics_all[metric_name][gt][pred] = []
+
                 # If original cropped cells are not needed
                 metrics_all.pop(metric_name)
         return metrics_all
