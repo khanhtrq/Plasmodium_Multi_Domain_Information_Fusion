@@ -47,9 +47,10 @@ class MultiDomainInformationFusion(BaseModule):
         '''
         
 
-    def forward(self, instance_node: torch.Tensor, 
+    def forward(self, instance_node: torch.Tensor,
                 data_samples = None,
-                mode: str = 'loss'):
+                mode: str = 'loss',
+                domain_idx: int = None):
         """
         Input:
             instance_node: list of features from multiple levels, default: last layer backbone
@@ -62,7 +63,7 @@ class MultiDomainInformationFusion(BaseModule):
 
         instance_node = instance_node[0]
 
-        print("MODE IN NECK FROM CLASSIFIER:", mode)
+        # print("MODE IN NECK FROM CLASSIFIER:", mode)
 
 
         #Global Average Pooling
@@ -75,8 +76,9 @@ class MultiDomainInformationFusion(BaseModule):
             agent_node = self.agent_node(instance_node)
             self.update_agent_node(agent_node)
         elif mode =='predict':
-            print('PREIDCT PHASE IN MULTI DOMAIN NECK')
-            first_edge_indicies, second_edge_indicies = self.domain_graph_inference(instance_node, domain_idx=0)
+            # print('PREIDCT PHASE IN MULTI DOMAIN NECK')
+            first_edge_indicies, second_edge_indicies = self.domain_graph_inference(instance_node, 
+                                                            domain_idx= domain_idx)
             pass
                 
         node_1st = self.gcn_conv1(torch.cat((instance_node, self.agent_node_ema), dim = 0), 
@@ -115,13 +117,13 @@ class MultiDomainInformationFusion(BaseModule):
         #Normalize along batch dim, so that the sum equals to 1
         weight = F.softmax(weight, dim = 1)
 
-        print("SHAPE OF WEIGHT AND INSTANCE FEATURE:", weight.shape, instance_node.shape)
+        # print("SHAPE OF WEIGHT AND INSTANCE FEATURE:", weight.shape, instance_node.shape)
 
         
         #Dot product on batch dimension, sum over batch dimension
         agent_node = (weight*instance_node).sum(dim = 1)
-        print('SHAPE OF AGENT NODE FEATURE:',  agent_node.shape)
-        print("SHAPE OF WIEGHT:", weight.shape)
+        # print('SHAPE OF AGENT NODE FEATURE:',  agent_node.shape)
+        # print("SHAPE OF WIEGHT:", weight.shape)
 
         return agent_node
     
@@ -149,8 +151,8 @@ class MultiDomainInformationFusion(BaseModule):
             second_kn_graph[-self.n_domains + idx_domain,
                             batch_size*idx_domain : batch_size * (idx_domain+1)] = 1
         
-        print(second_kn_graph)
-        print(first_kn_graph)
+        # print(second_kn_graph)
+        # print(first_kn_graph)
         # print("SECOND KNOWLEDGE GRAPH:\n", second_kn_graph.nonzero(as_tuple=False).t())
         
         first_edge_indicies = first_kn_graph.nonzero(as_tuple=False).t()
@@ -178,7 +180,8 @@ class MultiDomainInformationFusion(BaseModule):
         #Instance node to agent node connection
         second_kn_graph[:instance_node.shape[0], -self.n_domains + domain_idx ] = 1
         second_kn_graph[-self.n_domains + domain_idx, :instance_node.shape[0]] = 1
-        
+
+        # print("ADJACENCY MATRIX INFERENCE DOMAIN INDEX {}:".format(domain_idx))        
         # print(first_kn_graph)
         # print(second_kn_graph)
 
@@ -191,14 +194,14 @@ class MultiDomainInformationFusion(BaseModule):
     def update_agent_node(self, agent_node):
         if torch.all(self.agent_node_ema == 0):
             #Intialize torch tensor
-            print(self.agent_node_ema)
+            # print(self.agent_node_ema)
             self.agent_node_ema.add_(agent_node.detach())
-            print("After:", self.agent_node_ema)
-            print(agent_node)
+            # print("After:", self.agent_node_ema)
+            # print(agent_node)
         else:
             self.agent_node_ema.data = (1-self.ema_alpha)*self.agent_node_ema.data + self.ema_alpha*agent_node
-            print("TYPE OF AGENT NODE EMA:", type(self.agent_node_ema))       
-            print("Neck model dictioinary:", self.state_dict().keys()) 
+            # print("TYPE OF AGENT NODE EMA:", type(self.agent_node_ema))       
+            # print("Neck model dictioinary:", self.state_dict().keys()) 
         '''
         To dos:
             - Do not update in evaluation mode: DONE

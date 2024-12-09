@@ -8,6 +8,11 @@ from mmengine.evaluator import Evaluator
 from torch.utils.data import DataLoader
 import torch
 
+from mmengine.runner.amp import autocast
+from mmengine.structures import BaseDataElement
+from mmengine.utils import is_list_of
+
+
 import os
 
 import shutil
@@ -54,15 +59,15 @@ class MultiDomainTestLoop(TestLoop):
 
         #Khanh implementation for multi-domain evaluation 
         metrics_all = {}
-        for idx_domain, dataloader in enumerate(self.dataloaders):
+        for domain_idx, dataloader in enumerate(self.dataloaders):
             for idx, data_batch in enumerate(dataloader):
-                self.run_iter(idx, data_batch)
+                self.run_iter(idx, data_batch, domain_idx)
 
             # compute metrics
             metrics = self.evaluator.evaluate(len(dataloader.dataset))
 
             for metric_name in metrics.keys():
-                metrics_all['{}/{}'.format(self.domain_names[idx_domain], metric_name)] = metrics[metric_name]
+                metrics_all['{}/{}'.format(self.domain_names[domain_idx], metric_name)] = metrics[metric_name]
 
         if self.test_loss:
             loss_dict = _parse_losses(self.test_loss, 'test')
@@ -74,16 +79,41 @@ class MultiDomainTestLoop(TestLoop):
         self.runner.call_hook('after_test_epoch', metrics=metrics_all)
         self.runner.call_hook('after_test')
         return metrics
+    
+    @torch.no_grad()
+    def run_iter(self, idx, data_batch: Sequence[dict],
+                 domain_idx: int) -> None:
+        """Iterate one mini-batch.
+
+        Args:
+            data_batch (Sequence[dict]): Batch of data from dataloader.
+        """
+        self.runner.call_hook(
+            'before_test_iter', batch_idx=idx, data_batch=data_batch)
+        # predictions should be sequence of BaseDataElement
+        with autocast(enabled=self.fp16):
+            outputs = self.runner.model.test_step(data_batch, domain_idx = domain_idx)
+
+        outputs, self.test_loss = _update_losses(outputs, self.test_loss)
+
+        self.evaluator.process(data_samples=outputs, data_batch=data_batch)
+        self.runner.call_hook(
+            'after_test_iter',
+            batch_idx=idx,
+            data_batch=data_batch,
+            outputs=outputs)
+
+
 
     def save_false_classification(self, metrics_all):
-        for idx_domain in range(len(self.dataloaders)):
-            metric_name = '{}/{}'.format(self.domain_names[idx_domain], 'false_classification')
+        for domain_idx in range(len(self.dataloaders)):
+            metric_name = '{}/{}'.format(self.domain_names[domain_idx], 'false_classification')
             
             if metric_name in metrics_all.keys():
                 for gt in metrics_all[metric_name]:
                     for pred in metrics_all[metric_name][gt]:
                         path = os.path.join(self.runner.work_dir, 'false_classification', 
-                                            self.domain_names[idx_domain], CLASS_NAMES[gt], 
+                                            self.domain_names[domain_idx], CLASS_NAMES[gt], 
                                             CLASS_NAMES[pred])
                         os.makedirs(path, exist_ok=True)
 
@@ -104,6 +134,33 @@ class MultiDomainTestLoop(TestLoop):
                 # metrics_all.pop(metric_name)
         return metrics_all
 
+def _update_losses(outputs: list, losses: dict) -> Tuple[list, dict]:
+    """Update and record the losses of the network.
+
+    Args:
+        outputs (list): The outputs of the network.
+        losses (dict): The losses of the network.
+
+    Returns:
+        list: The updated outputs of the network.
+        dict: The updated losses of the network.
+    """
+    if isinstance(outputs[-1],
+                  BaseDataElement) and outputs[-1].keys() == ['loss']:
+        loss = outputs[-1].loss  # type: ignore
+        outputs = outputs[:-1]
+    else:
+        loss = dict()
+
+    for loss_name, loss_value in loss.items():
+        if loss_name not in losses:
+            losses[loss_name] = HistoryBuffer()
+        if isinstance(loss_value, torch.Tensor):
+            losses[loss_name].update(loss_value.item())
+        elif is_list_of(loss_value, torch.Tensor):
+            for loss_value_i in loss_value:
+                losses[loss_name].update(loss_value_i.item())
+    return outputs, losses
 
 def _parse_losses(losses: Dict[str, HistoryBuffer],
                   stage: str) -> Dict[str, float]:

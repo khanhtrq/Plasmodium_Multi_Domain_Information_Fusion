@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-from typing import List, Optional
+from typing import List, Optional, Union, Dict
 
 import torch
 import torch.nn as nn
@@ -29,18 +29,21 @@ class MultiDomainClassifier(ImageClassifier):
     def forward(self,
                 inputs: torch.Tensor,
                 data_samples: Optional[List[DataSample]] = None,
-                mode: str = 'tensor'):
+                mode: str = 'tensor',
+                domain_idx: int = None):
         if mode == 'tensor':
             feats = self.extract_feat(inputs, mode)
             return self.head(feats) if self.with_head else feats
         elif mode == 'loss':
             return self.loss(inputs, data_samples, mode)
         elif mode == 'predict':
-            return self.predict(inputs, data_samples, mode)
+            # assert domain index
+            return self.predict(inputs, domain_idx, data_samples, mode)
         else:
             raise RuntimeError(f'Invalid mode "{mode}".')
 
-    def extract_feat(self, inputs, mode, stage='neck'):
+    def extract_feat(self, inputs, mode, stage='neck',
+                     domain_idx: int = None):
         assert stage in ['backbone', 'neck', 'pre_logits'], \
             (f'Invalid output stage "{stage}", please choose from "backbone", '
              '"neck" and "pre_logits"')
@@ -49,10 +52,9 @@ class MultiDomainClassifier(ImageClassifier):
 
         if stage == 'backbone':
             return x
-        print('MODE IN EXTRACT FEATURE FUNCTION:', mode)
+        # print('MODE IN EXTRACT FEATURE FUNCTION:', mode)
         if self.with_neck:
-            print("AAAAAA")
-            x = self.neck(x, mode=mode)
+            x = self.neck(x, mode=mode, domain_idx = domain_idx)
         if stage == 'neck':
             return x
 
@@ -76,9 +78,11 @@ class MultiDomainClassifier(ImageClassifier):
         """
         feats = self.extract_feat(inputs, mode=mode)
         return self.head.loss(feats, data_samples)
+    
 
     def predict(self,
                 inputs: torch.Tensor,
+                domain_idx: int, 
                 data_samples: Optional[List[DataSample]] = None,
                 mode: str = 'predict',
                 **kwargs) -> List[DataSample]:
@@ -92,6 +96,59 @@ class MultiDomainClassifier(ImageClassifier):
             **kwargs: Other keyword arguments accepted by the ``predict``
                 method of :attr:`head`.
         """
-        print("MODE IN CLASSIFIER:", mode)
-        feats = self.extract_feat(inputs, mode=mode)
+        # print("MODE IN CLASSIFIER:", mode)
+        feats = self.extract_feat(inputs, mode=mode, domain_idx= domain_idx)
         return self.head.predict(feats, data_samples, **kwargs)
+    
+    #Override from BaseModel
+    def val_step(self, data: Union[tuple, dict, list],
+                 domain_idx: int) -> list:
+        """Gets the predictions of given data.
+
+        Calls ``self.data_preprocessor(data, False)`` and
+        ``self(inputs, data_sample, mode='predict')`` in order. Return the
+        predictions which will be passed to evaluator.
+
+        Args:
+            data (dict or tuple or list): Data sampled from dataset.
+
+        Returns:
+            list: The predictions of given data.
+        """
+        data = self.data_preprocessor(data, False)
+        return self._run_forward(data, mode='predict', domain_idx= domain_idx)  # type: ignore
+    
+    def test_step(self, data: Union[dict, tuple, list],
+                  domain_idx: int) -> list:
+        """``BaseModel`` implements ``test_step`` the same as ``val_step``.
+
+        Args:
+            data (dict or tuple or list): Data sampled from dataset.
+
+        Returns:
+            list: The predictions of given data.
+        """
+        data = self.data_preprocessor(data, False)
+        return self._run_forward(data, mode='predict', domain_idx= domain_idx)  # type: ignore
+
+
+    def _run_forward(self, data: Union[dict, tuple, list],
+                     mode: str,
+                     domain_idx: int = None) -> Union[Dict[str, torch.Tensor], list]:
+        """Unpacks data for :meth:`forward`
+
+        Args:
+            data (dict or tuple or list): Data sampled from dataset.
+            mode (str): Mode of forward.
+
+        Returns:
+            dict or list: Results of training or testing mode.
+        """
+        if isinstance(data, dict):
+            results = self(**data, mode=mode, domain_idx = domain_idx)
+        elif isinstance(data, (list, tuple)):
+            results = self(*data, mode=mode, domain_idx = domain_idx)
+        else:
+            raise TypeError('Output of `data_preprocessor` should be '
+                            f'list, tuple or dict, but got {type(data)}')
+        return results
