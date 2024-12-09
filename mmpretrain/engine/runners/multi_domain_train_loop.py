@@ -77,8 +77,8 @@ class MultiDomainTrainLoop(EpochBasedTrainLoop):
           for d in data:
             data_batch['data_samples'].extend(d['data_samples'])
           
-          print("DATA SAMPLES", data_batch['data_samples'][0])
-          print(data_batch['inputs'].shape)
+          # print("DATA SAMPLES", data_batch['data_samples'][0])
+          # print(data_batch['inputs'].shape)
   
   
           self.run_iter(idx_iter, data_batch)
