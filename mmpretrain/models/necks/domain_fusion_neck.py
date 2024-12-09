@@ -37,8 +37,8 @@ class MultiDomainInformationFusion(BaseModule):
 
         self.agent_node_ema = nn.Parameter(torch.zeros(n_domains, input_dim),
                                            requires_grad = False)
-        if torch.cuda.is_available():
-            self.agent_node_ema.to(device='cuda')
+        # if torch.cuda.is_available():
+        #     self.agent_node_ema.to(device='cuda')
         self.ema_alpha = ema_alpha
 
         '''
@@ -81,10 +81,14 @@ class MultiDomainInformationFusion(BaseModule):
             # print('PREIDCT PHASE IN MULTI DOMAIN NECK')
             first_edge_indicies, second_edge_indicies = self.domain_graph_inference(instance_node, 
                                                             domain_idx= domain_idx)
-            pass
         
-        print("DEVICE OF TENSOR:", self.gcn_conv1.lin.weight.device, instance_node.device, 
-              self.agent_node_ema.device, first_edge_indicies.device)
+        if torch.cuda.is_available():
+            first_edge_indicies.to(device='cuda')
+            second_edge_indicies.to(device='cuda')
+
+        
+        # print("DEVICE OF TENSOR:", self.gcn_conv1.lin.weight.device, instance_node.device, 
+        #       self.agent_node_ema.device, first_edge_indicies.device)
         
         node_1st = self.gcn_conv1(torch.cat((instance_node, self.agent_node_ema), dim = 0), 
                                        first_edge_indicies)  # Apply first GCN layer
