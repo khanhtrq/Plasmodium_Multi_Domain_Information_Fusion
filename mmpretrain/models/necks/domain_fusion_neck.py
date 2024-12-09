@@ -37,6 +37,8 @@ class MultiDomainInformationFusion(BaseModule):
 
         self.agent_node_ema = nn.Parameter(torch.zeros(n_domains, input_dim),
                                            requires_grad = False)
+        if torch.cuda.is_available():
+            self.agent_node_ema.to(device='cuda')
         self.ema_alpha = ema_alpha
 
         '''
