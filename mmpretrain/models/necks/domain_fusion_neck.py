@@ -21,7 +21,8 @@ class MultiDomainInformationFusion(BaseModule):
             self.neck(x) --> self.neck(x, datasamples); 
             extract_feat(inputs) --> extract_feat(inputs, data_samples)
     '''
-    def __init__(self, input_dim, hidden_dim, output_dim):
+    def __init__(self, input_dim, hidden_dim, output_dim,
+                 n_domains, ema_alpha = 0.6):
 
         super(MultiDomainInformationFusion, self).__init__()
 
@@ -32,86 +33,178 @@ class MultiDomainInformationFusion(BaseModule):
 
         self.weight_head = nn.Linear(input_dim, input_dim)
 
+        self.n_domains = n_domains
+
+        self.agent_node_ema = nn.Parameter(torch.zeros(n_domains, input_dim),
+                                           requires_grad = False)
+        self.ema_alpha = ema_alpha
+
         '''
-        self.agent_nodes: Tensor, shape (n_domains, n_agent_nodes = n_classes)
-        self.batch_size: information to know which samples are from which domain
+        self.agent_nodes: Tensor, shape (self.n_domains, n_agent_nodes = n_classes)
+        batch_size: information to know which samples are from which domain
         self.wieght_head: Conv 1x1, head to get contribution weight for agent nodes
 
         '''
         
 
-    def forward(self, instance_feat: torch.Tensor, 
-                kn_graph: torch.Tensor = None,
-                data_samples = None):
+    def forward(self, instance_node: torch.Tensor, 
+                data_samples = None,
+                mode: str = 'loss'):
         """
         Input:
-            instance_feat: list of features from multiple levels, default: last layer backbone
+            instance_node: list of features from multiple levels, default: last layer backbone
         Args:
-            instance_feat: Node feature matrix (num_nodes instance_feat input_dim)
-            kn_graph: adjacency matrix, either node --> node or sparse matrix. Fixed
-        Procedure: 
-            Calculate current agent nodes, function calculate_agent_node()
-            Update agent nodes by EMA, function ema()
-            Average pooling instances features to shape: (batch_size, feature_dim, 1, 1)
-            Concatenate instances features with agent nodes feature
-            
-            Input to GCN: self.gcn_conv1 and gcn_conv2
-        
+            instance_node: Node feature matrix (num_nodes instance_node input_dim)
+            mode (str): 'loss' for training, 'predict' for inference
         Return:
             Information-fused features (without agent node features)
         """
 
-        print("TYPE OF INPUT GCN LAYER:", type(instance_feat))
-        print('LENGTH OF X:', len(instance_feat))
-        print(type(instance_feat[0]))
-        print('SHAPE OF INPUT:', instance_feat[0].shape)
-        instance_feat = instance_feat[0]
+        instance_node = instance_node[0]
 
-        instance_feat = self.gap(instance_feat)
-        instance_feat = instance_feat.view(instance_feat.size(0), -1)
-        print("SHAPE AFTER POOLING:", instance_feat.shape)
+        print("MODE IN NECK FROM CLASSIFIER:", mode)
 
-        self.agent_feat(instance_feat)
- 
-        kn_graph = torch.tensor([[0],
-                           [1]], dtype=torch.long)
+
+        #Global Average Pooling
+        instance_node = self.gap(instance_node)
+        instance_node = instance_node.view(instance_node.size(0), -1)
+
+        if mode == 'loss':
+            first_edge_indicies, second_edge_indicies = self.domain_graph_training(instance_node)
+            
+            agent_node = self.agent_node(instance_node)
+            self.update_agent_node(agent_node)
+        elif mode =='predict':
+            print('PREIDCT PHASE IN MULTI DOMAIN NECK')
+            first_edge_indicies, second_edge_indicies = self.domain_graph_inference(instance_node, domain_idx=0)
+            pass
                 
-        instance_feat = self.gcn_conv1(instance_feat, kn_graph)  # Apply first GCN layer
-        instance_feat = self.gcn_conv2(instance_feat, kn_graph)  # Apply second GCN layer
-
-        print("SHAPE AFTER AVERAGE POOLING:", instance_feat.shape)
+        node_1st = self.gcn_conv1(torch.cat((instance_node, self.agent_node_ema), dim = 0), 
+                                       first_edge_indicies)  # Apply first GCN layer
         
+        node_2nd = self.gcn_conv2(node_1st, 
+                                       second_edge_indicies)  # Apply second GCN layer        
         #Update agents node 
         
-        print("SHAPE OF OUTPUT OF GCN MULTI DOMAIN FUSION:", instance_feat.shape)
-        return tuple([instance_feat])
+        instance_node = node_2nd[:-self.n_domains]
+
+        return tuple([instance_node])
     
-    def agent_feat(self, instance_feat: torch.Tensor):
+    def agent_node(self, instance_node: torch.Tensor):
         '''
         input: instance features 
         output: agent nodes for current iteration
 
         Calculate weighted agent nodes by classes
 
-        instance_feat --> weight_head --> instance weight
+        instance_node --> weight_head --> instance weight
         '''
+
+        # Returns a new Tensor, detached from the current graph.
+        instance_node = instance_node.detach()
+        batch_size = instance_node.shape[0] // self.n_domains
         
-        weight = self.weight_head(instance_feat)
-        #Shape of wieght: (Batch, feature_dim)
-        #Normalize batch dimension --> sum by batch dim equals to 1
+        weight = self.weight_head(instance_node)
+        # Shape of weight: (Batch_size * n_domain, feat_dim)
+        # Expected reshaped: (self.n_domains, batch_size, feat_dim)
+
+
+        weight = weight.view(self.n_domains, batch_size, -1)
+        instance_node = instance_node.view(self.n_domains, batch_size, -1)
+        
+        #Normalize along batch dim, so that the sum equals to 1
+        weight = F.softmax(weight, dim = 1)
+
+        print("SHAPE OF WEIGHT AND INSTANCE FEATURE:", weight.shape, instance_node.shape)
+
+        
+        #Dot product on batch dimension, sum over batch dimension
+        agent_node = (weight*instance_node).sum(dim = 1)
+        print('SHAPE OF AGENT NODE FEATURE:',  agent_node.shape)
         print("SHAPE OF WIEGHT:", weight.shape)
 
+        return agent_node
+    
+    def domain_graph_training(self, instance_node: torch.Tensor):
+        batch_size = instance_node.shape[0] // self.n_domains
+        first_kn_graph = torch.zeros(instance_node.shape[0] + self.n_domains, 
+                                     instance_node.shape[0] + self.n_domains)
+        second_kn_graph = torch.zeros(instance_node.shape[0] + self.n_domains, 
+                                     instance_node.shape[0] + self.n_domains)
+        
+        first_kn_graph[instance_node.shape[0]:, 
+                       instance_node.shape[0]:] = 1
+        second_kn_graph[instance_node.shape[0]:, 
+                       instance_node.shape[0]:] = 1
 
-    def ema():
-        '''
-        Update agent nodes by EMA
-        '''
-        pass
+        for idx_domain in range(self.n_domains):
+            first_kn_graph[instance_node.shape[0] + idx_domain, 
+                           instance_node.shape[0] + idx_domain] = 0
+            second_kn_graph[instance_node.shape[0] + idx_domain, 
+                           instance_node.shape[0] + idx_domain] = 0
 
-    def build_matrix():
+            # instance node --> agent node
+            second_kn_graph[batch_size*idx_domain : batch_size * (idx_domain+1),
+                            -self.n_domains + idx_domain] = 1
+            second_kn_graph[-self.n_domains + idx_domain,
+                            batch_size*idx_domain : batch_size * (idx_domain+1)] = 1
+        
+        print(second_kn_graph)
+        print(first_kn_graph)
+        # print("SECOND KNOWLEDGE GRAPH:\n", second_kn_graph.nonzero(as_tuple=False).t())
+        
+        first_edge_indicies = first_kn_graph.nonzero(as_tuple=False).t()
+        second_edge_indicies = second_kn_graph.nonzero(as_tuple=False).t()
+
+        return first_edge_indicies, second_edge_indicies
+    
+    def domain_graph_inference(self, instance_node: torch.Tensor, domain_idx):
+        first_kn_graph = torch.zeros(instance_node.shape[0] + self.n_domains, 
+                                     instance_node.shape[0] + self.n_domains)
+        second_kn_graph = torch.zeros(instance_node.shape[0] + self.n_domains, 
+                                     instance_node.shape[0] + self.n_domains)
+        #Agent node connection
+        first_kn_graph[instance_node.shape[0]:, 
+                       instance_node.shape[0]:] = 1
+        second_kn_graph[instance_node.shape[0]:, 
+                       instance_node.shape[0]:] = 1
+
+        for idx_domain in range(self.n_domains):
+            first_kn_graph[instance_node.shape[0] + idx_domain, 
+                           instance_node.shape[0] + idx_domain] = 0
+            second_kn_graph[instance_node.shape[0] + idx_domain, 
+                           instance_node.shape[0] + idx_domain] = 0
+        
+        #Instance node to agent node connection
+        second_kn_graph[:instance_node.shape[0], -self.n_domains + domain_idx ] = 1
+        second_kn_graph[-self.n_domains + domain_idx, :instance_node.shape[0]] = 1
+        
+        # print(first_kn_graph)
+        # print(second_kn_graph)
+
+        first_edge_indicies = first_kn_graph.nonzero(as_tuple=False).t()
+        second_edge_indicies = second_kn_graph.nonzero(as_tuple=False).t()
+
+        return first_edge_indicies, second_edge_indicies
+
+
+    def update_agent_node(self, agent_node):
+        if torch.all(self.agent_node_ema == 0):
+            #Intialize torch tensor
+            print(self.agent_node_ema)
+            self.agent_node_ema.add_(agent_node.detach())
+            print("After:", self.agent_node_ema)
+            print(agent_node)
+        else:
+            self.agent_node_ema.data = (1-self.ema_alpha)*self.agent_node_ema.data + self.ema_alpha*agent_node
+            print("TYPE OF AGENT NODE EMA:", type(self.agent_node_ema))       
+            print("Neck model dictioinary:", self.state_dict().keys()) 
         '''
-        Update ajacency matrix
+        To dos:
+            - Do not update in evaluation mode: DONE
+            - Save and load agent node value to evaluate during test phase: DONE
+                By defining it as model parameters with requires_grad = False
         '''
-        pass
+        # self.agent_node_ema = agent_node
     
         

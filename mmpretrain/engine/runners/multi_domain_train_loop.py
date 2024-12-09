@@ -64,7 +64,7 @@ class MultiDomainTrainLoop(EpochBasedTrainLoop):
            dataloaders_iter.append(iter(dataloader))
         
         #for one epoch, number of iterations is defined by the smallest dataloader
-        for idx in range(self.min_dataloader_len):
+        for idx_iter in range(self.min_dataloader_len):
           data = []
           for idx_domain in range(self.n_domains):
             data.append(next(dataloaders_iter[idx_domain]))
@@ -76,8 +76,12 @@ class MultiDomainTrainLoop(EpochBasedTrainLoop):
           data_batch['data_samples'] = []
           for d in data:
             data_batch['data_samples'].extend(d['data_samples'])
+          
+          print("DATA SAMPLES", data_batch['data_samples'][0])
+          print(data_batch['inputs'].shape)
   
-          self.run_iter(idx, data_batch)
+  
+          self.run_iter(idx_iter, data_batch)
 
         # -------------
         # Original EpochBasedTrainLoop
@@ -107,6 +111,7 @@ class MultiDomainTrainLoop(EpochBasedTrainLoop):
           # Sum and squared sum
           total_sum += images.sum([0, 2, 3])  # Sum over batch, height, width
           total_sum_squared += (images ** 2).sum([0, 2, 3])
+      print("DONE ON DATASET")
 
   
     # Calculate mean and std
