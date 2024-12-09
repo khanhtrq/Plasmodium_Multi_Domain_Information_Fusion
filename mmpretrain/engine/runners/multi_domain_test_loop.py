@@ -29,6 +29,7 @@ class MultiDomainTestLoop(TestLoop):
                  evaluator: Union[Evaluator, Dict, List],
                  dataloaders_multi_domain: List[Union[DataLoader, Dict]] = [],
                  domain_names: List = None, #List of domain names according to dataloaders
+                 save_false_cases_name: bool = False,
                  fp16: bool = False) -> None:
         
         super().__init__(runner, dataloader, evaluator)
@@ -47,6 +48,8 @@ class MultiDomainTestLoop(TestLoop):
             self.domain_names = DOMAIN_NAMES
         else:
             self.domain_names = domain_names
+
+        self.save_false_cases_name = save_false_cases_name
 
     def run(self) -> dict:
         """Launch test."""
@@ -131,7 +134,8 @@ class MultiDomainTestLoop(TestLoop):
                             metrics_all[metric_name][gt][pred] = []
 
                 # If original cropped cells are not needed
-                # metrics_all.pop(metric_name)
+                if not self.save_false_cases_name:
+                    metrics_all.pop(metric_name)
         return metrics_all
 
 def _update_losses(outputs: list, losses: dict) -> Tuple[list, dict]:
