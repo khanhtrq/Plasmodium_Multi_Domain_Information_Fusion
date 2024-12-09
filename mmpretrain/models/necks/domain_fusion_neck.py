@@ -84,7 +84,7 @@ class MultiDomainInformationFusion(BaseModule):
             pass
         
         print("DEVICE OF TENSOR:", self.gcn_conv1.lin.weight.device, instance_node.device, 
-              self.agent_node_ema.device, first_edge_indicies)
+              self.agent_node_ema.device, first_edge_indicies.device)
         
         node_1st = self.gcn_conv1(torch.cat((instance_node, self.agent_node_ema), dim = 0), 
                                        first_edge_indicies)  # Apply first GCN layer
