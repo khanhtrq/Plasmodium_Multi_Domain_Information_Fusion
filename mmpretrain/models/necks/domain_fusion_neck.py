@@ -82,12 +82,12 @@ class MultiDomainInformationFusion(BaseModule):
             first_edge_indicies, second_edge_indicies = self.domain_graph_inference(instance_node, 
                                                             domain_idx= domain_idx)
             pass
-                
+        
+        print("DEVICE OF TENSOR:", self.gcn_conv1.weight.device, instance_node.device, self.agent_node_ema.device)
+        
         node_1st = self.gcn_conv1(torch.cat((instance_node, self.agent_node_ema), dim = 0), 
                                        first_edge_indicies)  # Apply first GCN layer
         
-        print("DEVICE OF TENSOR:", self.gcn_conv1.weight.device, instance_node.device, self.agent_node_ema.device)
-
         node_2nd = self.gcn_conv2(node_1st, second_edge_indicies)  # Apply second GCN layer        
         #Update agents node 
         
