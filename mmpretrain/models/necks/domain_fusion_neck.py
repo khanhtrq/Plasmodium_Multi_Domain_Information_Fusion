@@ -113,6 +113,7 @@ class MultiDomainInformationFusion(BaseModule):
         # Returns a new Tensor, detached from the current graph.
         instance_node = instance_node.detach()
         batch_size = instance_node.shape[0] // self.n_domains
+
         
         weight = self.weight_head(instance_node)
         # Shape of weight: (Batch_size * n_domain, feat_dim)
