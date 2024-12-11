@@ -12,6 +12,8 @@ from mmengine.runner.amp import autocast
 from mmengine.structures import BaseDataElement
 from mmengine.utils import is_list_of
 
+from ...models.classifiers.multi_domain_classifier import MultiDomainClassifier
+
 
 import os
 
@@ -94,8 +96,12 @@ class MultiDomainTestLoop(TestLoop):
         self.runner.call_hook(
             'before_test_iter', batch_idx=idx, data_batch=data_batch)
         # predictions should be sequence of BaseDataElement
+
         with autocast(enabled=self.fp16):
-            outputs = self.runner.model.test_step(data_batch, domain_idx = domain_idx)
+            if isinstance(self.runner.model, MultiDomainClassifier):
+                outputs = self.runner.model.test_step(data_batch, domain_idx = domain_idx)
+            else: 
+                outputs = self.runner.model.test_step(data_batch)
 
         outputs, self.test_loss = _update_losses(outputs, self.test_loss)
 

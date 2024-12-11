@@ -12,6 +12,9 @@ from mmengine.runner.amp import autocast
 from mmengine.structures import BaseDataElement
 from mmengine.utils import is_list_of
 
+from .multi_domain_test_loop import MultiDomainTestLoop
+from ...models.classifiers.multi_domain_classifier import MultiDomainClassifier
+
 
 CLASS_NAMES = ['Ring', 'Trophozoite', 'Schizont', 'Gametocyte', 
                'HealthyRBC', 'Other', 'Difficult']
@@ -88,8 +91,11 @@ class MultiDomainValLoop(ValLoop):
             'before_val_iter', batch_idx=idx, data_batch=data_batch)
         # outputs should be sequence of BaseDataElement
         with autocast(enabled=self.fp16):
-            outputs = self.runner.model.val_step(data_batch, domain_idx = domain_idx)
-
+            if isinstance(self.runner.model, MultiDomainClassifier):
+                outputs = self.runner.model.val_step(data_batch, domain_idx = domain_idx)
+            else: 
+                outputs = self.runner.model.val_step(data_batch)
+            
         outputs, self.val_loss = _update_losses(outputs, self.val_loss)
 
         self.evaluator.process(data_samples=outputs, data_batch=data_batch)
