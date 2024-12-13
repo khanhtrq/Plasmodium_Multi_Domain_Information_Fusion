@@ -15,7 +15,7 @@ from .nonlinear_neck import NonLinearNeck
 from .simmim_neck import SimMIMLinearDecoder
 from .spark_neck import SparKLightDecoder
 from .swav_neck import SwAVNeck
-from .domain_fusion_neck import MultiDomainInformationFusion
+from .domain_fusion_neck import MultiDomainInformationFusion, MDIFClassLevel
 
 __all__ = [
     'GlobalAveragePooling',
@@ -36,4 +36,5 @@ __all__ = [
     'iTPNPretrainDecoder',
     'SparKLightDecoder',
     'MultiDomainInformationFusion',
+    'MDIFClassLevel'
 ]

@@ -31,6 +31,7 @@ class MultiDomainClassifier(ImageClassifier):
                 data_samples: Optional[List[DataSample]] = None,
                 mode: str = 'tensor',
                 domain_idx: int = None):
+
         if mode == 'tensor':
             feats = self.extract_feat(inputs, mode)
             return self.head(feats) if self.with_head else feats
@@ -42,7 +43,9 @@ class MultiDomainClassifier(ImageClassifier):
         else:
             raise RuntimeError(f'Invalid mode "{mode}".')
 
-    def extract_feat(self, inputs, mode, stage='neck',
+    def extract_feat(self, inputs, mode, 
+                     data_samples: Optional[List[DataSample]] = None, 
+                     stage='neck',
                      domain_idx: int = None):
         assert stage in ['backbone', 'neck', 'pre_logits'], \
             (f'Invalid output stage "{stage}", please choose from "backbone", '
@@ -54,7 +57,8 @@ class MultiDomainClassifier(ImageClassifier):
             return x
         # print('MODE IN EXTRACT FEATURE FUNCTION:', mode)
         if self.with_neck:
-            x = self.neck(x, mode=mode, domain_idx = domain_idx)
+            x = self.neck(x, mode=mode, domain_idx = domain_idx,
+                          data_samples = data_samples)
         if stage == 'neck':
             return x
 
@@ -76,7 +80,7 @@ class MultiDomainClassifier(ImageClassifier):
         Returns:
             dict[str, Tensor]: a dictionary of loss components
         """
-        feats = self.extract_feat(inputs, mode=mode)
+        feats = self.extract_feat(inputs, mode=mode, data_samples=data_samples)
         return self.head.loss(feats, data_samples)
     
 
@@ -97,7 +101,8 @@ class MultiDomainClassifier(ImageClassifier):
                 method of :attr:`head`.
         """
         # print("MODE IN CLASSIFIER:", mode)
-        feats = self.extract_feat(inputs, mode=mode, domain_idx= domain_idx)
+        feats = self.extract_feat(inputs, mode=mode, domain_idx= domain_idx,
+                                  data_samples=data_samples)
         return self.head.predict(feats, data_samples, **kwargs)
     
     #Override from BaseModel
