@@ -169,8 +169,6 @@ class MultiDomainInformationFusion(BaseModule):
             agent_node_updated = (1-self.ema_alpha)*self.agent_node_ema.detach() + \
                 self.ema_alpha*agent_node_domain_level
 
-        print("TYPE OF AGENT NODE:", type(self.agent_node_ema))
-
         self.agent_node_ema = torch.nn.Parameter(agent_node_updated.detach(), 
                                                  requires_grad = False)
 
@@ -203,7 +201,7 @@ class MDIFClassLevel(BaseModule):
                 data_samples = None,
                 mode: str = 'loss',
                 domain_idx: int = None):
-
+        
         return self._forward_class_level(instance_node, data_samples, mode, domain_idx)
 
     def _forward_class_level(self, instance_node: torch.Tensor,
@@ -224,12 +222,9 @@ class MDIFClassLevel(BaseModule):
             first_edge_indicies, second_edge_indicies = self.class_graph_training(instance_node.shape[0], labels)
             agent_node_class_level = self.agent_node_class_level(instance_node, labels)
             agent_node_updated = self.update_agent_node_class_level(agent_node_class_level)
-
         elif mode =='predict':
-            # KEEP AN EYE ON!!!
-            # Temporally using training matrix
-            first_edge_indicies, second_edge_indicies = self.class_graph_inference(instance_node,
-                                                                                   domain_idx)
+            first_edge_indicies, second_edge_indicies, second_edge_weight = \
+                        self.class_graph_inference(instance_node, domain_idx)
             
             agent_node_updated = self.agent_node_ema.detach()
 
@@ -239,12 +234,16 @@ class MDIFClassLevel(BaseModule):
         if torch.cuda.is_available():
             first_edge_indicies = first_edge_indicies.to(device='cuda')
             second_edge_indicies = second_edge_indicies.to(device='cuda')
+            if mode == 'predict':
+                second_edge_weight = second_edge_weight.to(device= 'cuda')
   
         node_1st = self.gcn_conv1(torch.cat((instance_node, agent_node_updated), dim = 0), 
                                        first_edge_indicies)
-        
-        node_2nd = self.gcn_conv2(node_1st, second_edge_indicies)       
-        
+        if mode =='loss':
+            node_2nd = self.gcn_conv2(node_1st, second_edge_indicies)       
+        elif mode == 'predict':
+            node_2nd = self.gcn_conv2(node_1st, second_edge_indicies, edge_weight = second_edge_weight)       
+
         instance_node = node_2nd[:-self.n_domains*self.n_classes]
 
         return tuple([instance_node])
@@ -294,19 +293,10 @@ class MDIFClassLevel(BaseModule):
 
         for class_idx in range(self.n_classes):
             matched_indicies = np.where(labels == class_idx)
-            print(matched_indicies)
-            print(instance_node[matched_indicies].shape)
 
             #Softmax by dimension 0 (batch_size)
             w = F.softmax(weight[matched_indicies], dim= 0)
-            print("Shape of w:", w.shape)
-            print("Sample of softmax:", w[:, :4])
-
             agent_node = (w*instance_node[matched_indicies]).sum(dim = 0)
-            print("SHAPE OF AGENT NODE FOR ONE CLASS:", agent_node.shape)
-            print(agent_node[:5])
-            print('SUM OVER BATCH DIEMNSION:', w.sum(dim=0))
-            print('SHAPE OF AGENT NODE:', agent_node.shape)
 
             agent_nodes.append(agent_node)
 
@@ -318,11 +308,6 @@ class MDIFClassLevel(BaseModule):
                 If the agent node is zero-tensor, do not update global agent node by regular EMA
                 , must ignore this case without updating, because is is not the actual value of agent node
             '''
-        
-        print("SHAPE OF STACKED AGENT NODES:", torch.stack(agent_nodes).shape)
-
-        #Concatenate agent nodes from all classes
-        # if there are no samples for one class, agent_node = tensor with all zero values
 
         return torch.stack(agent_nodes) #shape: (n_classes, feat_dim)
     
@@ -374,32 +359,40 @@ class MDIFClassLevel(BaseModule):
             second_kn_graph[n_instances + class_idx*self.n_domains:n_instances + (class_idx+1)*self.n_domains,
                            n_instances + class_idx*self.n_domains:n_instances + (class_idx+1)*self.n_domains] = 1
             
-            for domain_idx in range(self.n_domains):
-                first_kn_graph[n_instances + class_idx*self.n_domains + domain_idx,
-                               n_instances + class_idx*self.n_domains + domain_idx] = 0
-                second_kn_graph[n_instances + class_idx*self.n_domains + domain_idx,
-                               n_instances + class_idx*self.n_domains + domain_idx] = 0  
+            for d_idx in range(self.n_domains):
+                first_kn_graph[n_instances + class_idx*self.n_domains + d_idx,
+                               n_instances + class_idx*self.n_domains + d_idx] = 0
+                second_kn_graph[n_instances + class_idx*self.n_domains + d_idx,
+                               n_instances + class_idx*self.n_domains + d_idx] = 0  
                 
         agt = self.agent_node_ema.reshape(self.n_classes, self.n_domains, -1)
-        print("SHAPE:", agt.shape)
-        print("GET AGENT NODES FOR THIS GRAPH:", agt[:, domain_idx, :].shape)
-        print("SHAPE OF INSTANCE NODE:", )
+        agt = agt[:, domain_idx, :]
+
+        agt_mask = torch.any(agt != 0, dim = 1)
         
         for instance_idx in range(n_instances):
             instance = instance_node[instance_idx]
-            print("SHAPE OF INSTANCE NODE:", instance.shape)
+            instance = torch.stack([instance for i in range(self.n_classes)])
+            distance = torch.norm(instance - agt, p=2, dim= 1)
 
-            for class_idx in range(self.n_classes):
+            #Only take the distance to non-zero agent nodes
+            distance = distance[agt_mask]
+            distance_inversed = 1 / distance
+            edge_weight = distance_inversed / distance_inversed.sum()
+
+            for i, class_idx in enumerate(agt_mask.nonzero().squeeze(dim = 1).numpy()):
                 #Set values by normalized distance to agent nodes
-                second_kn_graph[instance_idx, n_instances + class_idx*self.n_domains + domain_idx] = 1 
-                second_kn_graph[n_instances + class_idx*self.n_domains + domain_idx, instance_idx] = 1
+                second_kn_graph[instance_idx, n_instances + class_idx*self.n_domains + domain_idx] = edge_weight[i] 
+                second_kn_graph[n_instances + class_idx*self.n_domains + domain_idx, instance_idx] = edge_weight[i]
 
         #Calculating distance to the agent node here
-
         first_edge_indicies = first_kn_graph.nonzero(as_tuple=False).t()
         second_edge_indicies = second_kn_graph.nonzero(as_tuple=False).t()
 
-        return first_edge_indicies, second_edge_indicies
+        row, col = torch.nonzero(second_kn_graph, as_tuple=True)
+        second_edge_weight = second_kn_graph[row, col]
+
+        return first_edge_indicies, second_edge_indicies, second_edge_weight
 
     def update_agent_node_class_level(self, agent_node_class_level: torch.Tensor):
         '''
@@ -416,7 +409,6 @@ class MDIFClassLevel(BaseModule):
         # then reshape to (-1, feat_dim), order: class 1(d1, d2, d3), class 2 (d1, d2, d3)
         agent_node_class_level = torch.permute(agent_node_class_level, (1, 0, 2))
         agent_node_class_level = agent_node_class_level.reshape(self.n_classes*self.n_domains, -1)
-        print("AGENT NODES:", agent_node_class_level[:, :3])
         
         agent_node_updated = torch.zeros_like(agent_node_class_level)
         
@@ -435,6 +427,5 @@ class MDIFClassLevel(BaseModule):
                     self.agent_node_ema[agt_idx] = agent_node_updated[agt_idx].detach()
                 else:
                     agent_node_updated[agt_idx] = self.agent_node_ema[agt_idx].detach()
-        print("IN function:", agent_node_updated[:, :3])
 
         return agent_node_updated
