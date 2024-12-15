@@ -219,7 +219,8 @@ class MDIFClassLevel(BaseModule):
         instance_node = instance_node.view(instance_node.size(0), -1)
         
         if mode == 'loss':
-            first_edge_indicies, second_edge_indicies = self.class_graph_training(instance_node.shape[0], labels)
+            first_edge_indicies, second_edge_indicies, second_edge_weight = \
+                self.class_graph_training(instance_node, labels)
             agent_node_class_level = self.agent_node_class_level(instance_node, labels)
             agent_node_updated = self.update_agent_node_class_level(agent_node_class_level)
         elif mode =='predict':
@@ -234,13 +235,13 @@ class MDIFClassLevel(BaseModule):
         if torch.cuda.is_available():
             first_edge_indicies = first_edge_indicies.to(device='cuda')
             second_edge_indicies = second_edge_indicies.to(device='cuda')
-            if mode == 'predict':
-                second_edge_weight = second_edge_weight.to(device= 'cuda')
+            # if mode == 'predict':
+            second_edge_weight = second_edge_weight.to(device= 'cuda')
   
         node_1st = self.gcn_conv1(torch.cat((instance_node, agent_node_updated), dim = 0), 
                                        first_edge_indicies)
         if mode =='loss':
-            node_2nd = self.gcn_conv2(node_1st, second_edge_indicies)       
+            node_2nd = self.gcn_conv2(node_1st, second_edge_indicies, edge_weight = second_edge_weight)       
         elif mode == 'predict':
             node_2nd = self.gcn_conv2(node_1st, second_edge_indicies, edge_weight = second_edge_weight)       
 
@@ -311,7 +312,68 @@ class MDIFClassLevel(BaseModule):
 
         return torch.stack(agent_nodes) #shape: (n_classes, feat_dim)
     
-    def class_graph_training(self, n_instances, labels):
+    def class_graph_training(self, instance_node: torch.Tensor,
+                             labels):
+        
+        n_instances = instance_node.shape[0]
+        batch_size = n_instances // self.n_domains
+        first_kn_graph = torch.zeros(n_instances + self.n_domains*self.n_classes, 
+                                     n_instances + self.n_domains*self.n_classes)
+        second_kn_graph = torch.zeros(n_instances + self.n_domains*self.n_classes, 
+                                     n_instances + self.n_domains*self.n_classes)
+        
+        for class_idx in range(self.n_classes):
+            first_kn_graph[n_instances + class_idx*self.n_domains:n_instances + (class_idx+1)*self.n_domains,
+                           n_instances + class_idx*self.n_domains:n_instances + (class_idx+1)*self.n_domains] = 1
+            second_kn_graph[n_instances + class_idx*self.n_domains:n_instances + (class_idx+1)*self.n_domains,
+                           n_instances + class_idx*self.n_domains:n_instances + (class_idx+1)*self.n_domains] = 1
+            
+            for domain_idx in range(self.n_domains):
+                first_kn_graph[n_instances + class_idx*self.n_domains + domain_idx,
+                               n_instances + class_idx*self.n_domains + domain_idx] = 0
+                second_kn_graph[n_instances + class_idx*self.n_domains + domain_idx,
+                               n_instances + class_idx*self.n_domains + domain_idx] = 0        
+
+        for instance_idx in range(len(labels)):
+            domain_idx = instance_idx // batch_size
+            class_idx = labels[instance_idx]
+
+            agt = self.agent_node_ema.reshape(self.n_classes, self.n_domains, -1)
+            agt = agt[:, domain_idx, :]
+
+            instance = instance_node[instance_idx]
+            instance = torch.stack([instance for i in range(self.n_classes)])
+            distance = torch.norm(instance - agt, p=2, dim= 1)
+
+            #Only take the distance to non-zero agent nodes
+            agt_mask = torch.any(agt != 0, dim = 1)
+            distance = distance[agt_mask]
+            distance_inversed = 1 / distance
+            edge_weight = distance_inversed / distance_inversed.sum()
+
+            #This edge is not necessary
+            # second_kn_graph[instance_idx, n_instances + class_idx*self.n_domains + domain_idx] = 1
+            for i, c_idx in enumerate(agt_mask.nonzero().squeeze(dim = 1).cpu().numpy()):
+                second_kn_graph[n_instances + c_idx*self.n_domains + domain_idx, instance_idx] = edge_weight[i]
+            
+            #Old knowledge graph
+            # second_kn_graph[instance_idx, n_instances + class_idx*self.n_domains + domain_idx] = 1
+            # second_kn_graph[n_instances + class_idx*self.n_domains + domain_idx, instance_idx] = 1
+
+        first_edge_indicies = first_kn_graph.nonzero(as_tuple=False).t()
+        second_edge_indicies = second_kn_graph.nonzero(as_tuple=False).t()
+
+        row, col = torch.nonzero(second_kn_graph, as_tuple=True)
+        second_edge_weight = second_kn_graph[row, col]
+        
+        # print("NEW KNOWLEDGE GRAPH:")
+        # print(second_kn_graph)
+        # print(second_edge_weight)
+        # print("NUMBER OF EDGES:", second_edge_weight.shape)
+
+        return first_edge_indicies, second_edge_indicies, second_edge_weight
+    
+    def _old_class_graph_training(self, n_instances, labels):
 
         batch_size = n_instances // self.n_domains
         first_kn_graph = torch.zeros(n_instances + self.n_domains*self.n_classes, 
@@ -334,6 +396,8 @@ class MDIFClassLevel(BaseModule):
         for instance_idx in range(len(labels)):
             domain_idx = instance_idx // batch_size
             class_idx = labels[instance_idx]
+
+            #Old knowledge graph
             second_kn_graph[instance_idx, n_instances + class_idx*self.n_domains + domain_idx] = 1
             second_kn_graph[n_instances + class_idx*self.n_domains + domain_idx, instance_idx] = 1
 
