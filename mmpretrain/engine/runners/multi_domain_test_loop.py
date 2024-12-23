@@ -147,7 +147,7 @@ class MultiDomainTestLoop(TestLoop):
                             os.makedirs(path_blood_smear, exist_ok=True)
 
                         for i in range(len(metrics_all[metric_name][gt][pred])):  
-                            if gt != pred: 
+                            if (gt != pred): 
                                 img_path = metrics_all[metric_name][gt][pred][i]
                                 cell_img = cv2.imread(img_path)
 
@@ -158,7 +158,7 @@ class MultiDomainTestLoop(TestLoop):
                                 # print("IMAGE PATH AFTER BEING REPLACED:", img_path)
                                 img_path = img_path.split('/')
 
-                                if self.domain_names[domain_idx] == 'OurPlasmodium':
+                                if (self.domain_names[domain_idx] == 'OurPlasmodium') and (self.blood_smear_data_path is not None):
                                     blood_img_path = os.path.join(self.blood_smear_data_path, 
                                                                 img_path[-4], 'images', img_path[-3] + '.*')
                                     blood_img_name = img_path[-3]
