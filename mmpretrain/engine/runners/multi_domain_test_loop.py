@@ -167,7 +167,7 @@ class MultiDomainTestLoop(TestLoop):
                                     # print(img_path)
                                     # print(blood_img_path)
                                     blood_img = cv2.imread(blood_img_path)
-                                    text = 'Label: {} \nPredicted: {} \nImage: {}'.format(CLASS_NAMES[gt], 
+                                    text = 'Label: {}, Predicted: {}, Image: {}'.format(CLASS_NAMES[gt], 
                                                                             CLASS_NAMES[pred],
                                                                             img_path[-3])
 
