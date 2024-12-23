@@ -42,9 +42,6 @@ class FalseClassification(BaseMetric):
     
     def compute_metrics(self, results: list) -> dict:
         
-        # false_classification = np.empty((self.num_classes, self.num_classes), dtype=object)
-        
-        #dict: {ground_truth}{prediction}
         false_classification = {}
         for i in range(self.num_classes):
             false_classification[i] = {}
@@ -54,16 +51,7 @@ class FalseClassification(BaseMetric):
         for sample in results:
             gt_label = sample['gt_label'].item()
             pred_label = sample['pred_label'].item()
-            
-            #Save all classification 
-            # if gt_label != pred_label:
-                # Save false classificaiton image
-                # Folder structure: Ground truth - Prediction 
-            false_classification[gt_label][pred_label].append(sample['img_path'])
 
-                # if false_classification[sample['gt_label'], sample['pred_label']] is None:
-                #     false_classification[sample['gt_label'], sample['pred_label']] = [sample['img_path']]
-                # else:      
-                #     false_classification[sample['gt_label'], sample['pred_label']].append(sample['img_path'])            
+            false_classification[gt_label][pred_label].append(sample['img_path'])
 
         return {'false_classification': false_classification}
