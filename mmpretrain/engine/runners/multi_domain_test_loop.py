@@ -167,12 +167,18 @@ class MultiDomainTestLoop(TestLoop):
                                     # print(img_path)
                                     # print(blood_img_path)
                                     blood_img = cv2.imread(blood_img_path)
-                                    text = 'Label: {} Predicted: {} Image: {}'.format(CLASS_NAMES[gt], 
+                                    text = 'Label: {} \nPredicted: {} \nImage: {}'.format(CLASS_NAMES[gt], 
                                                                             CLASS_NAMES[pred],
                                                                             img_path[-3])
 
                                     img = concat_images(blood_img, cell_img, text= text)
-                                    cv2.imwrite(os.path.join(path_blood_smear, blood_img_name + '.jpg'), img)                            
+                                    counter = 1
+                                    saved_path = os.path.join(path_blood_smear, '{}_{}.jpg'.format(blood_img_name, counter))
+                                    while os.path.exists(saved_path):
+                                        counter += 1
+                                        saved_path = os.path.join(path_blood_smear, '{}_{}.jpg'.format(blood_img_name, counter))
+
+                                    cv2.imwrite(saved_path, img)                           
 
                                 elif self.domain_names[domain_idx] == 'BBBC041':
                                     pass
