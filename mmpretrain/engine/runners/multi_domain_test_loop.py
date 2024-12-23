@@ -73,12 +73,12 @@ class MultiDomainTestLoop(TestLoop):
             for idx, data_batch in enumerate(dataloader):
                 self.run_iter(idx, data_batch, domain_idx)
 
-                '''
-                ----------------------
-                Break for testing only
-                ----------------------
-                '''
-                break
+                # '''
+                # ----------------------
+                # Break for testing only
+                # ----------------------
+                # '''
+                # break
 
             # compute metrics
             metrics = self.evaluator.evaluate(len(dataloader.dataset))
