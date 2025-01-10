@@ -1,6 +1,10 @@
 # Multi-Domain Information Fusion (MDIF) for Plasmodium Life Cycle Development Classification
 
-The repository was developed based on [MMPreTrain](https://github.com/open-mmlab/mmpretrain), with customized modules for MDIF Implementation. It is also available in [github](https://github.com/khanhtran2101/Multi_Domain_Learning_Malaria_Parasite).
+Repository for the the thesis title " Multi-Domain Information Fusion for Plasmodium Life Cycle Development Classification". The repository was developed based on [MMPreTrain](https://github.com/open-mmlab/mmpretrain), with customized modules for MDIF Implementation. It is also available in [github](https://github.com/khanhtran2101/Multi_Domain_Learning_Malaria_Parasite).
+
+## Overall framework
+
+
 
 ## Dataset
 
