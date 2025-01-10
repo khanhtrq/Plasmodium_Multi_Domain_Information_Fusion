@@ -1,10 +1,14 @@
 # Multi-Domain Information Fusion (MDIF) for Plasmodium Life Cycle Development Classification
 
-Repository for the the thesis title " Multi-Domain Information Fusion for Plasmodium Life Cycle Development Classification". The repository was developed based on [MMPreTrain](https://github.com/open-mmlab/mmpretrain), with customized modules for MDIF Implementation. It is also available in [github](https://github.com/khanhtran2101/Multi_Domain_Learning_Malaria_Parasite).
+Repository for the the thesis title "Multi-Domain Information Fusion for Plasmodium Life Cycle Development Classification". Full version of the thesis is available [here](https://husteduvn-my.sharepoint.com/:b:/g/personal/khanh_tq190085_sis_hust_edu_vn/EagW9zjNSihGo7q9DetTMrEBnEKpkYsc7VJVKMSVaQdJUg?e=5yziRO). 
+
+The repository was developed based on [MMPreTrain](https://github.com/open-mmlab/mmpretrain), with customized modules for MDIF Implementation. It is also available in [github](https://github.com/khanhtran2101/Multi_Domain_Learning_Malaria_Parasite).
 
 ## Overall framework
 
+MDIF is a module placed on top of feature extractor to integrate information across domains. An agent node globally represents a whole domain in Domain-level and one class of one doamin in Class-level setting. Two ways of knowledge graph construction are proposed to represent relationship across domains for information fusion.
 
+![Framework with MDIF](figure/mdif_framework.png)
 
 ## Dataset
 
