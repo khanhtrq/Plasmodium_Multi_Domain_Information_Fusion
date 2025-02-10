@@ -149,6 +149,7 @@ class MultiDomainTestLoop(TestLoop):
                         for i in range(len(metrics_all[metric_name][gt][pred])):  
                             if (gt != pred): 
                                 img_path = metrics_all[metric_name][gt][pred][i]
+                                box_path = img_path[:-3] + 'txt'
                                 cell_img = cv2.imread(img_path)
 
                                 shutil.copy(img_path, os.path.join(path_cell, '{}.jpg'.format(i))) 
@@ -170,6 +171,14 @@ class MultiDomainTestLoop(TestLoop):
                                     text = 'Label: {}, Predicted: {}, Image: {}'.format(CLASS_NAMES[gt], 
                                                                             CLASS_NAMES[pred],
                                                                             img_path[-3])
+                                    # Draw bounding box around cell
+                                    with open(box_path, 'r') as file:
+                                        content = file.read()
+                                    location = content.split(' ')[:-1]
+                                    location = [int(float(loc)) for loc in location]
+                                    x1, y1, x2, y2 = location
+                                    cv2.rectangle(blood_img, (x1, y1), (x2, y2), (0, 0, 255), 3)
+
 
                                     img = concat_images(blood_img, cell_img, text= text)
                                     counter = 1
