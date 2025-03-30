@@ -20,17 +20,23 @@ class MultiDomainClassifier(ImageClassifier):
                  pretrained: Optional[str] = None,
                  train_cfg: Optional[dict] = None,
                  data_preprocessor: Optional[dict] = None,
-                 init_cfg: Optional[dict] = None):
+                 init_cfg: Optional[dict] = None,
+                 domain_idx: int = 0 # Our Plasmodium index
+                 ):
         
         super().__init__(backbone, neck, head,
                         pretrained, train_cfg, data_preprocessor,
                         init_cfg)
+        self.domain_idx = domain_idx
         
     def forward(self,
                 inputs: torch.Tensor,
                 data_samples: Optional[List[DataSample]] = None,
                 mode: str = 'tensor',
                 domain_idx: int = None):
+        
+        if domain_idx is None:
+            domain_idx = self.domain_idx
 
         if mode == 'tensor':
             feats = self.extract_feat(inputs, mode)
