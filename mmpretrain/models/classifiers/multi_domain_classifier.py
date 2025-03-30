@@ -130,7 +130,7 @@ class MultiDomainClassifier(ImageClassifier):
         return self._run_forward(data, mode='predict', domain_idx= domain_idx)  # type: ignore
     
     def test_step(self, data: Union[dict, tuple, list],
-                  domain_idx: int) -> list:
+                  domain_idx: int = None) -> list:
         """``BaseModel`` implements ``test_step`` the same as ``val_step``.
 
         Args:
@@ -140,6 +140,9 @@ class MultiDomainClassifier(ImageClassifier):
             list: The predictions of given data.
         """
         data = self.data_preprocessor(data, False)
+        if domain_idx is None:
+            domain_idx = self.domain_idx
+            
         return self._run_forward(data, mode='predict', domain_idx= domain_idx)  # type: ignore
 
 
