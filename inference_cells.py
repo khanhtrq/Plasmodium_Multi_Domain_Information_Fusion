@@ -53,7 +53,7 @@ txt_file_list = [f for f in os.listdir(txt_result_dir) if os.path.isfile(os.path
 for txt_file in txt_file_list:
     result_file = os.path.join(txt_result_dir, txt_file)
     
-    refined_result = os.path.join(txt_result_dir, txt_file[:-3] + '_refined.txt')
+    refined_result = os.path.join(txt_result_dir, txt_file[:-4] + '_refined.txt')
     refined_result_list = []
 
     with open(result_file, "r") as file:
