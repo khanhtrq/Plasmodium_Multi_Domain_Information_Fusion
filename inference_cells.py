@@ -13,7 +13,8 @@ args = parser.parse_args()
 
 inferencer = ImageClassificationInferencer(
     model = args.model,
-    pretrained = args.pretrained)
+    pretrained = args.pretrained,
+    device='cuda')
 
 inferencer(inputs = args.inputs,
           show_dir = './visualize/')
