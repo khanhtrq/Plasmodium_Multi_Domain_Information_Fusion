@@ -21,7 +21,7 @@ class MultiDomainClassifier(ImageClassifier):
                  train_cfg: Optional[dict] = None,
                  data_preprocessor: Optional[dict] = None,
                  init_cfg: Optional[dict] = None,
-                 domain_idx: int = 0 # Our Plasmodium index
+                 domain_idx: int = 1 # IML Malaria
                  ):
         
         super().__init__(backbone, neck, head,
