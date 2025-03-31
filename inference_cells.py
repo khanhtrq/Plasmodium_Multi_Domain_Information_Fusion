@@ -11,7 +11,7 @@ parser = argparse.ArgumentParser(description="Parser for classification")
 parser.add_argument("--model", type=str, help="path to config file")
 parser.add_argument("--pretrained", type=str, help="path to model pretrained (trained parameteres) pt file")
 parser.add_argument("--inputs", type=str, help="path to image or images folder")
-parser.add_argument("--detection_sve_dir", type=str, help="path to image or images folder")
+parser.add_argument("--detection_save_dir", type=str, help="path to image or images folder")
 
 
 args = parser.parse_args()
