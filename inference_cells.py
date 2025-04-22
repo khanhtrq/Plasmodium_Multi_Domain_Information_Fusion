@@ -32,7 +32,9 @@ inferencer = ImageClassificationInferencer(
     device='cuda')
 
 classification_results = inferencer(inputs = input_images,
-                                    show_dir = '../visualize/')
+                                    show_dir = './visualize/')
+print(classification_results)
+
 #----------
 # DETECTION RSULT
 # ---------
