@@ -21,10 +21,10 @@ save_dir = detection_results[0].save_dir
 txt_result_dir = os.path.join(save_dir, "labels")
 txt_file_list = [f for f in os.listdir(txt_result_dir) if os.path.isfile(os.path.join(txt_result_dir, f))]
 print("Number of blood smear images:", len(txt_file_list))
-print(txt_file_list)
 
 for txt_file in txt_file_list:
-    image = cv2.imread(args.blood_smear_images)
+    img_path = os.path.join(args.blood_smear_images, txt_file.split('.')[0] + ".jpg")
+    image = cv2.imread(img_path)
     height, width, _ = image.shape
 
     output_folder = os.path.join(save_dir, 'crop', txt_file.split('.')[0])
