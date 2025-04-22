@@ -36,15 +36,15 @@ for rbc_folder in os.listdir(args.rbc_images):
 
     classification_results = inferencer(inputs = input_images,
                                         show_dir = './visualize/')
-    print(classification_results)
-    #----------
+        #----------
     # DETECTION RSULT
     # ---------
     
     txt_file = [f for f in os.listdir(os.path.join(args.detection_save_dir, "labels")) if f.startswith(rbc_folder)][0]
     result_file = os.path.join(txt_result_dir, txt_file)
     
-    refined_result = os.path.join(txt_result_dir, txt_file[:-4] + '_refined.txt')
+    os.makedirs(os.path.join(args.detection_save_dir, "life_cycle_labels"), exist_ok=True)
+    refined_result = os.path.join(os.path.join(args.detection_save_dir, "life_cycle_labels"), txt_file)
     refined_result_list = []
 
     with open(result_file, "r") as file:
