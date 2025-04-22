@@ -9,25 +9,26 @@ parser = argparse.ArgumentParser(description="Parser for classification")
 
 # Add arguments
 parser.add_argument("--detection_model", type=str, help="detection model")
-parser.add_argument("--detection_inputs", type=str, help="path to images folder")
+parser.add_argument("--blood_smear_images", type=str, help="path to folder with blood smear images")
 
 args = parser.parse_args()
 
 detection_model = YOLO(args.detection_model)
 
-detection_results = detection_model.predict(source=args.detection_inputs, save= True, save_txt= True)
+detection_results = detection_model.predict(source=args.blood_smear_images, save= True, save_txt= True)
 
 save_dir = detection_results[0].save_dir
 txt_result_dir = os.path.join(save_dir, "labels")
 txt_file_list = [f for f in os.listdir(txt_result_dir) if os.path.isfile(os.path.join(txt_result_dir, f))]
+print("Number of blood smear images:", len(txt_file_list))
 
 for txt_file in txt_file_list:
-    image = cv2.imread(args.detection_inputs)
+    image = cv2.imread(args.blood_smear_images)
     height, width, _ = image.shape
 
     output_folder = os.path.join(save_dir, 'crop', txt_file.split('.')[0])
     os.makedirs(output_folder, exist_ok=True)
-    print("Save cropped detected objects to:", output_folder)
+    print("Save cropped RBCs to:", output_folder)
 
     result_file = os.path.join(txt_result_dir, txt_file)
     with open(result_file, "r") as file:
