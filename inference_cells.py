@@ -27,8 +27,8 @@ else:
             input_images.append(os.path.abspath(os.path.join(root, file)))
 
 inferencer = ImageClassificationInferencer(
-    cls_model = args.cls_model,
-    cls_pretrained = args.cls_pretrained,
+    model = args.cls_model,
+    pretrained = args.cls_pretrained,
     device='cuda')
 
 classification_results = inferencer(inputs = input_images,
