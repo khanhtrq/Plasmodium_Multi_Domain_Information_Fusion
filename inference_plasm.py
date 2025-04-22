@@ -64,7 +64,7 @@ for txt_file in txt_file_list:
 # ---------------
 # CLASSIFICATION
 # ---------------
-detection_save_dir = os.path.join(save_dir, 'predict')
+detection_save_dir = save_dir
 
 inferencer = ImageClassificationInferencer(
     model = args.cls_model,
