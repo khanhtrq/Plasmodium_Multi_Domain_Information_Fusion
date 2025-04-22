@@ -74,14 +74,11 @@ txt_result_dir = os.path.join(detection_save_dir, "labels")
 
 
 for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
-    if Path(args.rbc_images).is_file():
-        input_images = [args.rbc_images]
-    else:
-        folder_path = os.path.join(args.rbc_images, rbc_folder)
-        input_images = []
-        for root, _, files in os.walk(folder_path):
-            for file in files:
-                input_images.append(os.path.abspath(os.path.join(root, file)))
+    folder_path = os.path.join(os.path.join(detection_save_dir, 'crop'), rbc_folder)
+    input_images = []
+    for root, _, files in os.walk(folder_path):
+        for file in files:
+            input_images.append(os.path.abspath(os.path.join(root, file)))
 
 
     classification_results = inferencer(inputs = input_images,
