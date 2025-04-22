@@ -16,33 +16,32 @@ parser.add_argument("--detection_save_dir", type=str, help="path to image or ima
 
 args = parser.parse_args()
 
-
-if Path(args.rbc_images).is_file():
-    input_images = [args.rbc_images]
-else:
-    folder_path = args.rbc_images
-    input_images = []
-    for root, _, files in os.walk(folder_path):
-        for file in files:
-            input_images.append(os.path.abspath(os.path.join(root, file)))
-
 inferencer = ImageClassificationInferencer(
     model = args.cls_model,
     pretrained = args.cls_pretrained,
     device='cuda')
-
-classification_results = inferencer(inputs = input_images,
-                                    show_dir = './visualize/')
-print(classification_results)
-
-#----------
-# DETECTION RSULT
-# ---------
-
 txt_result_dir = os.path.join(args.detection_save_dir, "labels")
-txt_file_list = [f for f in os.listdir(txt_result_dir) if os.path.isfile(os.path.join(txt_result_dir, f))]
 
-for txt_file in txt_file_list:
+
+for rbc_folder in os.listdir(args.rbc_images):
+    if Path(args.rbc_images).is_file():
+        input_images = [args.rbc_images]
+    else:
+        folder_path = os.path.join(args.rbc_images, rbc_folder)
+        input_images = []
+        for root, _, files in os.walk(folder_path):
+            for file in files:
+                input_images.append(os.path.abspath(os.path.join(root, file)))
+
+
+    classification_results = inferencer(inputs = input_images,
+                                        show_dir = './visualize/')
+    print(classification_results)
+    #----------
+    # DETECTION RSULT
+    # ---------
+    
+    txt_file = [f for f in os.listdir(os.path.join(args.detection_save_dir, "labels")) if f.startswith(rbc_folder)][0]
     result_file = os.path.join(txt_result_dir, txt_file)
     
     refined_result = os.path.join(txt_result_dir, txt_file[:-4] + '_refined.txt')
