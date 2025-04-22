@@ -74,6 +74,12 @@ txt_result_dir = os.path.join(detection_save_dir, "labels")
 
 
 for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
+    #get the coordication of image
+    img_name = [f for f in os.listdir(args.blood_smear_images) if f.startswith(rbc_folder)][0]
+    img_path = os.path.join(args.blood_smear_images, img_name)
+    image = cv2.imread(img_path)
+
+    #classification with mmpretrain model
     folder_path = os.path.join(os.path.join(detection_save_dir, 'crop'), rbc_folder)
     input_images = []
     for root, _, files in os.walk(folder_path):
@@ -83,9 +89,6 @@ for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
 
     classification_results = inferencer(inputs = input_images,
                                         show_dir = './visualize/')
-        #----------
-    # DETECTION RSULT
-    # ---------
     
     txt_file = [f for f in os.listdir(os.path.join(detection_save_dir, "labels")) if f.startswith(rbc_folder)][0]
     result_file = os.path.join(txt_result_dir, txt_file)
@@ -100,8 +103,14 @@ for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
     for i, line in enumerate(lines):
         parts = line.strip().split()
         class_name, x_center, y_center, w, h = parts[0], float(parts[1]), float(parts[2]), float(parts[3]), float(parts[4])
+        x_center, y_center, w, h = int(x_center * width), int(y_center * height), int(w * width), int(h * height)
+
+        # <class_name> <confidence> <left> <top> <right> <bottom>      
+        x1, y1 = max(0, x_center - w // 2), max(0, y_center - h // 2)
+        x2, y2 = min(width, x_center + w // 2), min(height, y_center + h // 2)
         refined_class_name = classification_results[i]['pred_label']
-        refined_result_list.append('{} {} {} {} {}\n'.format(refined_class_name, x_center, y_center, w, h))
+        pred_score = classification_results[i]['pred_score']
+        refined_result_list.append('{} {} {} {} {} {}\n'.format(refined_class_name, pred_score, x1, y1, x2, y2))
 
     with open(refined_result, "w") as refined_file:
         for line in refined_result_list:
