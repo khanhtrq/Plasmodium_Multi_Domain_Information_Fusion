@@ -24,6 +24,7 @@ print("Number of blood smear images:", len(txt_file_list))
 
 for txt_file in txt_file_list:
     img_path = os.path.join(args.blood_smear_images, txt_file.split('.')[0] + ".jpg")
+    print(img_path)
     image = cv2.imread(img_path)
     height, width, _ = image.shape
 
