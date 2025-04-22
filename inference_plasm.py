@@ -73,7 +73,7 @@ inferencer = ImageClassificationInferencer(
 txt_result_dir = os.path.join(detection_save_dir, "labels")
 
 
-for rbc_folder in os.listdir(args.rbc_images):
+for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
     if Path(args.rbc_images).is_file():
         input_images = [args.rbc_images]
     else:
