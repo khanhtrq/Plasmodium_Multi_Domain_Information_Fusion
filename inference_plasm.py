@@ -58,7 +58,7 @@ for txt_file in txt_file_list:
         # Crop object
         cropped_object = image[y1:y2, x1:x2]
 
-        output_filename = os.path.join(output_folder, f"{class_name}_{i+1}.jpg")
+        output_filename = os.path.join(output_folder, f"{i+1}_label{class_name}.jpg")
         cv2.imwrite(output_filename, cropped_object)
 
 # ---------------
