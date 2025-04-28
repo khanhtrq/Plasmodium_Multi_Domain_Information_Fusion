@@ -58,7 +58,7 @@ for txt_file in txt_file_list:
         # Crop object
         cropped_object = image[y1:y2, x1:x2]
 
-        output_filename = os.path.join(output_folder, f"{class_name}_{i}.jpg")
+        output_filename = os.path.join(output_folder, f"{class_name}_{i+1}.jpg")
         cv2.imwrite(output_filename, cropped_object)
 
 # ---------------
@@ -83,6 +83,7 @@ for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
     folder_path = os.path.join(os.path.join(detection_save_dir, 'crop'), rbc_folder)
     input_images = []
     for root, _, files in os.walk(folder_path):
+        print(files)
         for file in files:
             input_images.append(os.path.abspath(os.path.join(root, file)))
 
