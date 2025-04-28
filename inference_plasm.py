@@ -84,6 +84,8 @@ for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
     input_images = []
     for root, _, files in os.walk(folder_path):
         print(files)
+        files.sort()
+        print("Sorted:" files)
         for file in files:
             input_images.append(os.path.abspath(os.path.join(root, file)))
 
