@@ -208,10 +208,7 @@ class MDIFClassLevel(BaseModule):
                                 data_samples = None,
                                 mode: str = 'loss',
                                 domain_idx: int = None):
-        labels = np.array([data_sample.gt_label.item() for data_sample in data_samples])
-
-        # print("LABELS OF DATA:", labels)            
-
+        
         instance_node = instance_node[0]
 
         #Global Average Pooling
@@ -219,6 +216,7 @@ class MDIFClassLevel(BaseModule):
         instance_node = instance_node.view(instance_node.size(0), -1)
         
         if mode == 'loss':
+            labels = np.array([data_sample.gt_label.item() for data_sample in data_samples])
             first_edge_indicies, second_edge_indicies, second_edge_weight = \
                 self.class_graph_training(instance_node, labels)
             agent_node_class_level = self.agent_node_class_level(instance_node, labels)
