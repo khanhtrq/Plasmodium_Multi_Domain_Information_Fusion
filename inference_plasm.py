@@ -82,12 +82,8 @@ for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
     #classification with mmpretrain model
     folder_path = os.path.join(os.path.join(detection_save_dir, 'crop'), rbc_folder)
     input_images = []
-    for root, _, files in os.walk(folder_path):
-        print(files)
-        
+    for root, _, files in os.walk(folder_path):        
         files.sort(key=lambda x: int(x.split('.')[0]))
-
-        print("Sorted:", files)
         for file in files:
             input_images.append(os.path.abspath(os.path.join(root, file)))
 
