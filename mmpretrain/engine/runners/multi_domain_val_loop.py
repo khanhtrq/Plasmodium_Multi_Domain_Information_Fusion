@@ -9,6 +9,8 @@ from torch.utils.data import DataLoader
 import torch
 from mmengine.runner.amp import autocast
 
+import numpy as np
+
 from mmengine.structures import BaseDataElement
 from mmengine.utils import is_list_of
 
@@ -68,7 +70,16 @@ class MultiDomainValLoop(ValLoop):
             for metric_name in metrics.keys():
                 metrics_all['{}/{}'.format(self.domain_names[domain_idx], metric_name)] = metrics[metric_name]
         
-        # ValLoop implementation
+        # Format: 'OurPlasmodium/accuracy/top1'
+        #          IMLMalaria/precision/Ring
+        #          <domain_name>/<metric>/<class>
+        # Need new metric: average/accuracy/top1
+        accuracy = []
+        for domain_name in self.domain_names:
+            accuracy.append(metrics_all['{}/{}'.format(domain_name, 'accuracy/top1')])
+        metrics_all['average/accuracy/top1'] = float(np.mean(accuracy))
+        
+        # Original ValLoop implementation
         if self.val_loss:
             loss_dict = _parse_losses(self.val_loss, 'val')
             metrics.update(loss_dict)
