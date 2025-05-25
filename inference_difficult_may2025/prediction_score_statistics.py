@@ -25,7 +25,6 @@ inferencer = ImageClassificationInferencer(
     model = args.cls_model,
     pretrained = args.cls_pretrained,
     device='cuda')
-txt_result_dir = os.path.join(args.detection_save_dir, "labels")
 
 image_path = []
 pred_labels = [] #list of prediction label
