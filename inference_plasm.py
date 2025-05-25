@@ -15,6 +15,7 @@ parser.add_argument("--blood_smear_images", type=str, help="path to folder with 
 
 parser.add_argument("--cls_model", type=str, help="path to config file")
 parser.add_argument("--cls_pretrained", type=str, help="path to cls_model cls_pretrained (trained parameteres) pt file")
+parser.add_argument("--cls_batch_size", type=int, default=32, help="batch size")
 
 args = parser.parse_args()
 
@@ -89,7 +90,8 @@ for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
 
 
     classification_results = inferencer(inputs = input_images,
-                                        show_dir = './visualize/')
+                                        show_dir = './visualize/',
+                                        batch_size=args.cls_batch_size)
     
     txt_file = [f for f in os.listdir(os.path.join(detection_save_dir, "labels")) if f.startswith(rbc_folder)][0]
     result_file = os.path.join(txt_result_dir, txt_file)

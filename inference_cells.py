@@ -13,6 +13,8 @@ parser.add_argument("--cls_pretrained", type=str, help="path to cls_model cls_pr
 parser.add_argument("--rbc_images", type=str, help="path to image or images folder")
 parser.add_argument("--detection_save_dir", type=str, help="path to image or images folder")
 
+parser.add_argument("--cls_batch_size", type=int, default=32, help="batch size")
+
 
 args = parser.parse_args()
 
@@ -31,12 +33,14 @@ for rbc_folder in os.listdir(args.rbc_images):
         input_images = []
         for root, _, files in os.walk(folder_path):
             for file in files:
-                input_images.append(os.path.abspath(os.path.join(root, file)))
+                if file.split('.')[-1] == 'jpg':
+                    input_images.append(os.path.abspath(os.path.join(root, file)))
 
 
     classification_results = inferencer(inputs = input_images,
-                                        show_dir = './visualize/')
-        #----------
+                                        show_dir = './visualize/',
+                                        batch_size=args.cls_batch_size)
+    #----------
     # DETECTION RSULT
     # ---------
     
