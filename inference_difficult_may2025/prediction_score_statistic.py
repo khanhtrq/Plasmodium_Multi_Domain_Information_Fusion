@@ -14,7 +14,6 @@ parser = argparse.ArgumentParser(description="Parser for classification")
 parser.add_argument("--cls_model", type=str, help="path to config file")
 parser.add_argument("--cls_pretrained", type=str, help="path to cls_model cls_pretrained (trained parameteres) pt file")
 parser.add_argument("--rbc_images", type=str, help="path to images folder")
-parser.add_argument("--detection_save_dir", type=str, help="path to image or images folder")
 
 parser.add_argument("--cls_batch_size", type=int, default=32, help="batch size")
 parser.add_argument("--saved_name", type=str, default="val_prediction_score")
