@@ -57,16 +57,20 @@ classification_results = inferencer(inputs = input_images,
                                     show_dir = './visualize/',
                                     batch_size=args.cls_batch_size)
 
-for instance_pred in classification_results:    
-    sorted_scores = np.sort(instance_pred['pred_scores'])
-    sorted_scores = np.flip(sorted_scores)
-    
-    score_1st.append(sorted_scores[0])
-    score_2nd.append(sorted_scores[1])
-    pred_score_difference.append(sorted_scores[0] - sorted_scores[1])
-
-    pred_labels.append(instance_pred['pred_label'])
+scores = []
+for instance_pred in classification_results: 
+    scores.append(instance_pred['pred_scores'])
     pred_scores.append(instance_pred['pred_scores'])
+    pred_labels.append(instance_pred['pred_label'])
+
+scores = np.array(scores)
+scores = np.sort(scores, axis= 1)
+scores =np.flip(scores, axis= 1)
+
+for i in range(len(classification_results)):    
+    score_1st.append(int(scores[i, 0]))
+    score_2nd.append(int(scores[i, 1]))
+    pred_score_difference.append(int(scores[i, 0]) - int(scores[i, 1]))
 
 inference_df = pd.DataFrame(inference_data)
 
