@@ -19,7 +19,7 @@ parser.add_argument("--cls_model", type=str, help="path to config file")
 parser.add_argument("--cls_pretrained", type=str, help="path to cls_model cls_pretrained (trained parameteres) pt file")
 parser.add_argument("--annot_file", type=str)
 
-parser.add_argument("--threshold", type=int, default=0.6)
+parser.add_argument("--threshold", type=float, default=0.6)
 
 parser.add_argument("--cls_batch_size", type=int, default=32, help="batch size")
 parser.add_argument("--saved_path", type=str, default="evaluation_results")
