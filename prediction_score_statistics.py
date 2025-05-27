@@ -24,7 +24,7 @@ args = parser.parse_args()
 inferencer = ImageClassificationInferencer(
     model = args.cls_model,
     pretrained = args.cls_pretrained,
-    device='cuda')
+    device='cpu')
 
 image_path = []
 pred_labels = [] #list of prediction label
@@ -52,7 +52,7 @@ for root, _, files in os.walk(args.rbc_images):
             image_path.append(os.path.abspath(os.path.join(root, file)))
             
     
-
+print(input_images)
 classification_results = inferencer(inputs = input_images,
                                     show_dir = './visualize/',
                                     batch_size=args.cls_batch_size)

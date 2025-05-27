@@ -40,6 +40,8 @@ class MultiDomainTestLoop(TestLoop):
         
         super().__init__(runner, dataloader, evaluator)
 
+        self.evaluator.metrics[-1].num_classes = 10
+
         self.n_domains = len(dataloaders_multi_domain)
         self.dataloaders = [] #List of all dataloaders
 
@@ -78,7 +80,7 @@ class MultiDomainTestLoop(TestLoop):
                 # Break for testing only
                 # ----------------------
                 # '''
-                # break
+                break
 
             # compute metrics
             metrics = self.evaluator.evaluate(len(dataloader.dataset))
@@ -117,6 +119,45 @@ class MultiDomainTestLoop(TestLoop):
 
         outputs, self.test_loss = _update_losses(outputs, self.test_loss)
 
+        # NOTE: May 26, 2025
+        # Idea to implement the post processing to infer the difficult class
+        # Add one argument to signal the post-processing of the difficult class
+        # If the argument is True, call a fucntion for post procssing 
+        # What is the format of the local variable outputs? Does it contain the information of the prediction
+        # Including the prediction score? 
+
+        # This implementation is for evaluation of classification only
+        # A separate implemention is needed for the inference phase
+        # I would like to implement it using mmpretrain
+        # --------
+        #   POST PROCESSING FOR DISFFICULT CLASS
+        #       if diff_post_process: then call the function to modify the outputs
+        #           with the method to identify samples of difficult
+        #   TASK May 26: Format of the variable outputs
+        # ---------
+
+        print("OUTPUT IS HERE. SEE?")
+        print(type(outputs))
+        print(type(outputs[0]))
+
+        outputs[0].set_gt_label(1)
+        outputs[0].set_pred_label(6)
+
+        print(type(self.runner.test_evaluator))
+        print("EVALUATOR:", self.runner.test_evaluator.metrics[-1])
+        self.runner.test_evaluator.metrics[-1].num_classes = 10
+        print(self.runner.test_evaluator.metrics[-1].num_classes)
+
+        print(self.evaluator.metrics)
+
+
+        outputs[0].set_metainfo({'num_classes': 6})
+
+        print(outputs)
+
+        # End
+        # ----------
+
         self.evaluator.process(data_samples=outputs, data_batch=data_batch)
         self.runner.call_hook(
             'after_test_iter',
@@ -124,7 +165,8 @@ class MultiDomainTestLoop(TestLoop):
             data_batch=data_batch,
             outputs=outputs)
 
-
+    def inference_difficult_class(self, outputs):
+        pass
 
     def save_false_classification(self, metrics_all):
         save_dir_cell = create_folder_with_suffix(os.path.join(self.runner.work_dir, 'false_classification'))
