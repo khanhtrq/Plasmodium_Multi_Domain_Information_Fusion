@@ -40,7 +40,6 @@ class MultiDomainTestLoop(TestLoop):
         
         super().__init__(runner, dataloader, evaluator)
 
-        self.evaluator.metrics[-1].num_classes = 10
 
         self.n_domains = len(dataloaders_multi_domain)
         self.dataloaders = [] #List of all dataloaders
@@ -80,7 +79,7 @@ class MultiDomainTestLoop(TestLoop):
                 # Break for testing only
                 # ----------------------
                 # '''
-                break
+                # break
 
             # compute metrics
             metrics = self.evaluator.evaluate(len(dataloader.dataset))
