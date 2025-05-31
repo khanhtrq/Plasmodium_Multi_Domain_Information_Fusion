@@ -159,11 +159,11 @@ for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
 
 detection_conf = detection_conf_obj.return_matrix()
 
-#Save confusion matrix
-os.makedirs(args.save_dir, exist_ok= True)
-data = {"confusion_matrix": detection_conf}
-with open(os.path.join(args.save_dir, 'confusion_matrix.json'), 'w') as f:
-    json.dump(data, f, indent=4)
-
 print("Whole pipeline confusion matrix:")
 print(detection_conf)
+
+#Save confusion matrix
+os.makedirs(args.save_dir, exist_ok= True)
+data = {"confusion_matrix": detection_conf.tolist()}
+with open(os.path.join(args.save_dir, 'confusion_matrix.json'), 'w') as f:
+    json.dump(data, f, indent=4)
