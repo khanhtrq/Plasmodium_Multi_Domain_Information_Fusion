@@ -132,7 +132,7 @@ for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
         refined_result_list.append('{} {} {} {} {} {}\n'.format(refined_class_name, conf_score, x1, y1, x2, y2))
 
         #predictions results to compute confusion matrix
-        pred_conf.append([x1, x2, y1, y2, conf_score, refined_class_name])
+        pred_conf.append([x1, y1, x2, y2, conf_score, refined_class_name])
     pred_conf = np.array(pred_conf, dtype = object)
 
     #Grounth truth, format <label>, <x1>, <y1>, <x2>, <y2>
