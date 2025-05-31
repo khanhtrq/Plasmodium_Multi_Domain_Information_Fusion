@@ -18,11 +18,16 @@ parser.add_argument("--blood_smear_images", type=str, help="path to folder with 
 
 parser.add_argument("--cls_model", type=str, help="path to config file")
 parser.add_argument("--cls_pretrained", type=str, help="path to cls_model cls_pretrained (trained parameteres) pt file")
+
 parser.add_argument("--gt_folder", type=str, help="folder with annotation (entire pipeline)")
 
-parser.add_argument("--save_dir", type=str, help= "Directory to save confusion matrix.")
+parser.add_argument('--conf_threshold', type=float, default=0.3, help="Confidence threshold for the whole pipeline")
+parser.add_argument('--iou_threshold', type=float, default=0.5, help="IoU threshold for the whole pipeline")
 
+parser.add_argument("--save_dir", type=str, help= "Directory to save confusion matrix.")
 parser.add_argument("--cls_batch_size", type=int, default=32, help="batch size")
+
+
 
 
 args = parser.parse_args()
@@ -82,7 +87,8 @@ inferencer = ImageClassificationInferencer(
     device='cuda')
 txt_result_dir = os.path.join(detection_save_dir, "labels")
 
-detection_conf_obj = DetectionConfusionMatrix(num_classes=7)
+detection_conf_obj = DetectionConfusionMatrix(num_classes=7, CONF_THRESHOLD=args.conf_threshold,
+                                              IOU_THRESHOLD=args.iou_threshold)
 
 for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
     #get the coordication of image
