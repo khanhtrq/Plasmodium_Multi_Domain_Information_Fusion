@@ -30,7 +30,7 @@ def box_iou_calc(boxes1, boxes2):
     return inter / (area1[:, None] + area2 - inter)  # iou = inter / (area1 + area2 - inter)
 
 
-class ConfusionMatrix:
+class DetectionConfusionMatrix:
     def __init__(self, num_classes: int, CONF_THRESHOLD=0.3, IOU_THRESHOLD=0.5):
         self.matrix = np.zeros((num_classes + 1, num_classes + 1))
         self.num_classes = num_classes

@@ -2,8 +2,11 @@ from ultralytics import YOLO
 import argparse
 import os
 import cv2
+import numpy as np
+import json
 from mmpretrain.apis import ImageClassificationInferencer
 from pathlib import Path
+from utils.confusion_matrix import DetectionConfusionMatrix
 
 
 # Create argument parser
@@ -15,7 +18,12 @@ parser.add_argument("--blood_smear_images", type=str, help="path to folder with 
 
 parser.add_argument("--cls_model", type=str, help="path to config file")
 parser.add_argument("--cls_pretrained", type=str, help="path to cls_model cls_pretrained (trained parameteres) pt file")
+parser.add_argument("--gt_folder", type=str, help="folder with annotation (entire pipeline)")
+
+parser.add_argument("--save_dir", type=str, help= "Directory to save confusion matrix.")
+
 parser.add_argument("--cls_batch_size", type=int, default=32, help="batch size")
+
 
 args = parser.parse_args()
 
@@ -25,7 +33,8 @@ args = parser.parse_args()
 
 detection_model = YOLO(args.detection_model)
 
-detection_results = detection_model.predict(source=args.blood_smear_images, save= True, save_txt= True)
+detection_results = detection_model.predict(source=args.blood_smear_images, save= True, 
+                                            save_txt= True, save_conf= True)
 
 save_dir = detection_results[0].save_dir
 txt_result_dir = os.path.join(save_dir, "labels")
@@ -73,12 +82,13 @@ inferencer = ImageClassificationInferencer(
     device='cuda')
 txt_result_dir = os.path.join(detection_save_dir, "labels")
 
+detection_conf_obj = DetectionConfusionMatrix()
 
 for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
     #get the coordication of image
-    img_name = [f for f in os.listdir(args.blood_smear_images) if f.startswith(rbc_folder)][0]
-    img_path = os.path.join(args.blood_smear_images, img_name)
-    image = cv2.imread(img_path)
+    # cell_img_name = [f for f in os.listdir(args.blood_smear_images) if f.startswith(rbc_folder)][0]
+    # img_path = os.path.join(args.blood_smear_images, cell_img_name)
+    # image = cv2.imread(img_path)
 
     #classification with mmpretrain model
     folder_path = os.path.join(os.path.join(detection_save_dir, 'crop'), rbc_folder)
@@ -88,24 +98,30 @@ for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
         for file in files:
             input_images.append(os.path.abspath(os.path.join(root, file)))
 
-
     classification_results = inferencer(inputs = input_images,
                                         show_dir = './visualize/',
                                         batch_size=args.cls_batch_size)
     
     txt_file = [f for f in os.listdir(os.path.join(detection_save_dir, "labels")) if f.startswith(rbc_folder)][0]
     result_file = os.path.join(txt_result_dir, txt_file)
+    gt_file = os.path.join(args.gt_folder, txt_file)
     
     os.makedirs(os.path.join(detection_save_dir, "life_cycle_labels"), exist_ok=True)
     refined_result = os.path.join(os.path.join(detection_save_dir, "life_cycle_labels"), txt_file)
     refined_result_list = []
 
+    # detection result, format: Saves detection resut
+    # format: [class] [x_center] [y_center] [width] [height] [confidence] 
     with open(result_file, "r") as file:
         lines = file.readlines()
+
+    #list of predictions to compute confusion matrix
+    pred_conf = []
     
+    # format: [class] [x_center] [y_center] [width] [height] [confidence] 
     for i, line in enumerate(lines):
         parts = line.strip().split()
-        class_name, x_center, y_center, w, h = parts[0], float(parts[1]), float(parts[2]), float(parts[3]), float(parts[4])
+        class_name, x_center, y_center, w, h, conf_score = parts[0], float(parts[1]), float(parts[2]), float(parts[3]), float(parts[4]), float(parts[5])
         x_center, y_center, w, h = int(x_center * width), int(y_center * height), int(w * width), int(h * height)
 
         # <class_name> <confidence> <left> <top> <right> <bottom>      
@@ -113,8 +129,39 @@ for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
         x2, y2 = min(width, x_center + w // 2), min(height, y_center + h // 2)
         refined_class_name = classification_results[i]['pred_label']
         pred_score = classification_results[i]['pred_score']
-        refined_result_list.append('{} {} {} {} {} {}\n'.format(refined_class_name, pred_score, x1, y1, x2, y2))
+        
+        refined_result_list.append('{} {} {} {} {} {}\n'.format(refined_class_name, conf_score, x1, y1, x2, y2))
 
+        #predictions results to compute confusion matrix
+        pred_conf.append([x1, x2, y1, y2, conf_score, refined_class_name])
+    pred_conf = np.array(pred_conf, dtype = object)
+
+    #Grounth truth, format <label>, <x1>, <y1>, <x2>, <y2>
+    #list of grounth truth to compute confusion matrix
+    gt_conf = []
+    with open(gt_file, 'r') as f:
+        lines = file.readlines()
+    for gt_sample in lines:
+        gt_label, x1, y1, x2, y2 = gt_sample.split(' ')
+        gt_label = int(gt_label)
+        x1, y1, x2, y2 = int(x1), int(x2), int(y1), int(y2)
+        gt_conf.append([gt_label, x1, x2, y1, y2])
+    gt_conf = np.array(gt_conf, dtype = object)
+
+    detection_conf_obj.process_batch(pred_conf, gt_conf)
+
+    #Save the refined result
     with open(refined_result, "w") as refined_file:
         for line in refined_result_list:
            refined_file.write(line)
+
+detection_conf = detection_conf_obj.return_matrix()
+
+#Save confusion matrix
+os.makedirs(args.save_dir, exist_ok= True)
+data = {"confusion_matrix": detection_conf}
+with open(os.path.join(args.save_dir, 'confusion_matrix.json'), 'w') as f:
+    json.dump(data, f, indent=4)
+
+print("Whole pipeline confusion matrix:")
+print(detection_conf)
