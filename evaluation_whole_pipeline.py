@@ -174,5 +174,5 @@ print("Precision Recall:", pr_metrics)
 os.makedirs(args.save_dir, exist_ok= True)
 data = pr_metrics
 data["confusion_matrix"] = detection_conf.tolist()
-with open(os.path.join(args.save_dir, 'confusion_matrix.json'), 'w') as f:
+with open(os.path.join(args.save_dir, 'results.json'), 'w') as f:
     json.dump(data, f, indent=4)
