@@ -1,5 +1,6 @@
 import numpy as np
 
+CLASS_NAMES = ['Ring', 'Trophozoite', 'Schizont', 'Gametocyte', 'HealthyRBC', 'Background']
 
 def box_iou_calc(boxes1, boxes2):
     # https://github.com/pytorch/vision/blob/master/torchvision/ops/boxes.py
@@ -95,3 +96,30 @@ class DetectionConfusionMatrix:
     def print_matrix(self):
         for i in range(self.num_classes + 1):
             print(' '.join(map(str, self.matrix[i])))
+
+    def compute_PR_from_matrix(self, confusion_matrix):
+        precision_recall_metrics = {}
+        for i in range(self.num_classes + 1):
+            true_positives = confusion_matrix[i, i]
+            false_positives = sum(confusion_matrix[:, i]) - true_positives
+            false_negatives = sum(confusion_matrix[i, :]) - true_positives
+            
+            # Calculate precision_recall_metrics
+            precision_i = true_positives / (true_positives + false_positives) if (true_positives + false_positives) != 0 else 0
+            recall_i = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) != 0 else 0
+            
+            precision_recall_metrics['precision/{}'.format(CLASS_NAMES[i])] = float(precision_i)
+            precision_recall_metrics['recall/{}'.format(CLASS_NAMES[i])] = float(recall_i)
+        
+        parasitized_correct = 0
+        parasitized_recall = 0
+        parasitized_precision  = 0
+
+        for i in range(4):
+            parasitized_correct += confusion_matrix[i, i]
+            parasitized_recall += sum(confusion_matrix[i, :])
+            parasitized_precision += sum(confusion_matrix[:, i])
+        precision_recall_metrics['precision/parasitized'] = float(parasitized_correct / parasitized_precision)
+        precision_recall_metrics['recall/parasitized'] = float(parasitized_correct / parasitized_recall)
+
+        return precision_recall_metrics
