@@ -111,8 +111,8 @@ for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
     txt_file = [f for f in os.listdir(os.path.join(detection_save_dir, "labels")) if f.startswith(rbc_folder)][0]
     result_file = os.path.join(txt_result_dir, txt_file)
     
-    os.makedirs(os.path.join(detection_save_dir, "life_cycle_labels"), exist_ok=True)
-    refined_result = os.path.join(os.path.join(detection_save_dir, "life_cycle_labels"), txt_file)
+    os.makedirs(os.path.join(args.save_dir, "life_cycle_labels"), exist_ok=True)
+    refined_result = os.path.join(os.path.join(args.save_dir, "life_cycle_labels"), txt_file)
     refined_result_list = []
 
     # detection result, format: Saves detection resut
