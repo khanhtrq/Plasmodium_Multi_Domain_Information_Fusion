@@ -1,6 +1,7 @@
 import numpy as np
 
-CLASS_NAMES = ['Ring', 'Trophozoite', 'Schizont', 'Gametocyte', 'HealthyRBC', 'Background']
+CLASS_NAMES = ['Ring', 'Trophozoite', 'Schizont', 'Gametocyte', 
+               'HealthyRBC', 'Other', 'Difficult', 'Background']
 
 def box_iou_calc(boxes1, boxes2):
     # https://github.com/pytorch/vision/blob/master/torchvision/ops/boxes.py
