@@ -104,7 +104,6 @@ for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
     
     txt_file = [f for f in os.listdir(os.path.join(detection_save_dir, "labels")) if f.startswith(rbc_folder)][0]
     result_file = os.path.join(txt_result_dir, txt_file)
-    gt_file = os.path.join(args.gt_folder, txt_file)
     
     os.makedirs(os.path.join(detection_save_dir, "life_cycle_labels"), exist_ok=True)
     refined_result = os.path.join(os.path.join(detection_save_dir, "life_cycle_labels"), txt_file)
@@ -138,9 +137,11 @@ for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
 
     #Grounth truth, format <label>, <x1>, <y1>, <x2>, <y2>
     #list of grounth truth to compute confusion matrix
+
+    gt_path = os.path.join(args.gt_folder, txt_file)
     gt_conf = []
-    with open(gt_file, 'r') as f:
-        lines = file.readlines()
+    with open(gt_path, 'r') as f:
+        lines = f.readlines()
     for gt_sample in lines:
         gt_label, x1, y1, x2, y2 = gt_sample.split(' ')
         gt_label = int(gt_label)
