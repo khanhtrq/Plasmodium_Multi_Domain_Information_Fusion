@@ -100,7 +100,8 @@ for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
 
     classification_results = inferencer(inputs = input_images,
                                         show_dir = './visualize/',
-                                        batch_size=args.cls_batch_size)
+                                        batch_size=args.cls_batch_size,
+                                        device= 'cuda')
     
     txt_file = [f for f in os.listdir(os.path.join(detection_save_dir, "labels")) if f.startswith(rbc_folder)][0]
     result_file = os.path.join(txt_result_dir, txt_file)
