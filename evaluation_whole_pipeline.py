@@ -82,7 +82,7 @@ inferencer = ImageClassificationInferencer(
     device='cuda')
 txt_result_dir = os.path.join(detection_save_dir, "labels")
 
-detection_conf_obj = DetectionConfusionMatrix()
+detection_conf_obj = DetectionConfusionMatrix(num_classes=7)
 
 for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
     #get the coordication of image
