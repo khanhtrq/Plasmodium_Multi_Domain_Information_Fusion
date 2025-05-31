@@ -146,7 +146,7 @@ for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
         gt_label, x1, y1, x2, y2 = gt_sample.split(' ')
         gt_label = int(gt_label)
         x1, y1, x2, y2 = int(x1), int(x2), int(y1), int(y2)
-        gt_conf.append([gt_label, x1, x2, y1, y2])
+        gt_conf.append([gt_label, x1, y1, x2, y2])
     gt_conf = np.array(gt_conf, dtype = object)
 
     detection_conf_obj.process_batch(pred_conf, gt_conf)
