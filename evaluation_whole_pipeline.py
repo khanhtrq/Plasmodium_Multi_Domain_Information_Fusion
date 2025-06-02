@@ -168,7 +168,7 @@ detection_conf = detection_conf_obj.return_matrix()
 pr_metrics = detection_conf_obj.compute_PR_from_matrix(detection_conf)
 
 print("Whole pipeline confusion matrix:")
-print(torch.tensor(detection_conf))
+print(torch.tensor(detection_conf, dtype=torch.int64))
 print("Precision Recall:", pr_metrics)
 
 #Save confusion matrix
