@@ -84,7 +84,7 @@ class DetectionConfusionMatrix:
                 detection_class = detection_classes[int(all_matches[all_matches[:, 0] == i, 1][0])]
                 self.matrix[gt_class, detection_class] += 1
             else:
-                self.matrix[gt_class, detection_class] += 1
+                self.matrix[gt_class, self.num_classes] += 1
 
         for i, detection in enumerate(detections):
             if not all_matches.shape[0] or ( all_matches.shape[0] and all_matches[all_matches[:, 1] == i].shape[0] == 0 ):
