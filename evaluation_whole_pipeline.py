@@ -4,6 +4,7 @@ import os
 import cv2
 import numpy as np
 import json
+import torch
 from mmpretrain.apis import ImageClassificationInferencer
 from pathlib import Path
 from utils.confusion_matrix import DetectionConfusionMatrix
@@ -167,7 +168,7 @@ detection_conf = detection_conf_obj.return_matrix()
 pr_metrics = detection_conf_obj.compute_PR_from_matrix(detection_conf)
 
 print("Whole pipeline confusion matrix:")
-print(detection_conf)
+print(torch.tensor(detection_conf))
 print("Precision Recall:", pr_metrics)
 
 #Save confusion matrix
