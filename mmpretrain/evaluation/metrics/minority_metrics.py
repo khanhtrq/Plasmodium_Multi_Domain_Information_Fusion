@@ -12,7 +12,8 @@ from mmpretrain.registry import METRICS
 
 import os
 
-CLASS_NAMES = ['Ring', 'Trophozoite', 'Schizont', 'Gametocyte', 'HealthyRBC', 'Other', 'Difficult']
+CLASS_NAMES = ['Ring', 'Trophozoite', 'Schizont', 'Gametocyte', 'HealthyRBC', 'Other', 'Difficult',
+               'No name', 'No name', 'No name', 'No name', 'No name', 'No name', 'No name']
 
 
 @METRICS.register_module()
