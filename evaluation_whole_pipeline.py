@@ -29,6 +29,7 @@ parser.add_argument("--save_dir", type=str, help= "Directory to save confusion m
 parser.add_argument("--cls_batch_size", type=int, default=32, help="batch size")
 
 parser.add_argument('--merge_healthy_other', type=bool, default=False, help="Merge Healthy and Other class for evaluation")
+parser.add_argument('--num_classes', type=int, default= 7, help="Number of classes for confusion matrix")
 
 
 
@@ -90,7 +91,7 @@ inferencer = ImageClassificationInferencer(
     device='cuda')
 txt_result_dir = os.path.join(detection_save_dir, "labels")
 
-detection_conf_obj = DetectionConfusionMatrix(num_classes=7, CONF_THRESHOLD=args.conf_threshold,
+detection_conf_obj = DetectionConfusionMatrix(num_classes=args.num_classes, CONF_THRESHOLD=args.conf_threshold,
                                               IOU_THRESHOLD=args.iou_threshold)
 
 for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
