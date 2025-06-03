@@ -57,9 +57,7 @@ cls_results = inferencer(inputs = img_paths,
                         show_dir = './visualize/',
                         batch_size=args.cls_batch_size)
 
-for i in range(len(cls_results)):
-    pred_score = cls_results[i]['pred_scores']
-    pred_labels.append(cls_results[i]['pred_label'])
+pred_labels = [cls_results[i]['pred_label'] for i in range(len(cls_results))]
 
 confusion_matrix = ConfusionMatrix.calculate(pred= pred_labels, target= gt_labels, num_classes= args.num_classes)
 acc = Accuracy.calculate(pred=pred_labels, target=gt_labels)
