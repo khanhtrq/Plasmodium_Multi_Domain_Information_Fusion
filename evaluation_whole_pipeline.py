@@ -28,6 +28,8 @@ parser.add_argument('--iou_threshold', type=float, default=0.5, help="IoU thresh
 parser.add_argument("--save_dir", type=str, help= "Directory to save confusion matrix.")
 parser.add_argument("--cls_batch_size", type=int, default=32, help="batch size")
 
+parser.add_argument('--merge_healthy_other', type=bool, default=False, help="Merge Healthy and Other class for evaluation")
+
 
 
 
@@ -57,8 +59,8 @@ for txt_file in txt_file_list:
     os.makedirs(output_folder, exist_ok=True)
     print("Save cropped RBCs to:", output_folder)
 
-    result_file = os.path.join(txt_result_dir, txt_file)
-    with open(result_file, "r") as file:
+    cell_detection_result_file = os.path.join(txt_result_dir, txt_file)
+    with open(cell_detection_result_file, "r") as file:
         lines = file.readlines()
     
     for i, line in enumerate(lines):
@@ -110,15 +112,15 @@ for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
                                         batch_size=args.cls_batch_size)
     
     txt_file = [f for f in os.listdir(os.path.join(detection_save_dir, "labels")) if f.startswith(rbc_folder)][0]
-    result_file = os.path.join(txt_result_dir, txt_file)
+    cell_detection_result_file = os.path.join(txt_result_dir, txt_file)
     
     os.makedirs(os.path.join(args.save_dir, "life_cycle_labels"), exist_ok=True)
-    refined_result = os.path.join(os.path.join(args.save_dir, "life_cycle_labels"), txt_file)
-    refined_result_list = []
+    cls_detection_result = os.path.join(os.path.join(args.save_dir, "life_cycle_labels"), txt_file)
+    cls_detection_result_list = []
 
     # detection result, format: Saves detection resut
     # format: [class] [x_center] [y_center] [width] [height] [confidence] 
-    with open(result_file, "r") as file:
+    with open(cell_detection_result_file, "r") as file:
         lines = file.readlines()
 
     #list of predictions to compute confusion matrix
@@ -133,13 +135,18 @@ for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
         # <class_name> <confidence> <left> <top> <right> <bottom>      
         x1, y1 = max(0, x_center - w // 2), max(0, y_center - h // 2)
         x2, y2 = min(width, x_center + w // 2), min(height, y_center + h // 2)
-        refined_class_name = classification_results[i]['pred_label']
+        cls_class_name = classification_results[i]['pred_label']
         pred_score = classification_results[i]['pred_score']
+
+        if args.merge_healthy_other:
+            # if label == other then label = healthy
+            if cls_class_name == 5:
+                cls_class_name = 4
         
-        refined_result_list.append('{} {} {} {} {} {}\n'.format(refined_class_name, conf_score, x1, y1, x2, y2))
+        cls_detection_result_list.append('{} {} {} {} {} {}\n'.format(cls_class_name, conf_score, x1, y1, x2, y2))
 
         #predictions results to compute confusion matrix
-        pred_conf.append([x1, y1, x2, y2, conf_score, refined_class_name])
+        pred_conf.append([x1, y1, x2, y2, conf_score, cls_class_name])
     pred_conf = np.array(pred_conf, dtype = object)
 
     #Grounth truth, format <label>, <x1>, <y1>, <x2>, <y2>
@@ -159,8 +166,8 @@ for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
     detection_conf_obj.process_batch(pred_conf, gt_conf)
 
     #Save the refined result
-    with open(refined_result, "w") as refined_file:
-        for line in refined_result_list:
+    with open(cls_detection_result, "w") as refined_file:
+        for line in cls_detection_result_list:
            refined_file.write(line)
 
 detection_conf = detection_conf_obj.return_matrix()
