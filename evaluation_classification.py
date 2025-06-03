@@ -59,8 +59,6 @@ cls_results = inferencer(inputs = img_paths,
 
 for i in range(len(cls_results)):
     pred_score = cls_results[i]['pred_scores']
-    sorted_score = np.sort(pred_score)
-    sorted_score = np.flip(sorted_score)
     pred_labels.append(cls_results[i]['pred_label'])
 
 confusion_matrix = ConfusionMatrix.calculate(pred= pred_labels, target= gt_labels, num_classes= args.num_classes)
