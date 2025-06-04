@@ -34,7 +34,7 @@ batch_size = config.batch_size
 # print(config.data_root)
 # print(config.batch_size)
 
-with open(os.path.join(data_root, args.annot_file), 'r') as f:
+with open(args.annot_file, 'r') as f:
     lines = f.readlines()
 
 # print(lines[0])
