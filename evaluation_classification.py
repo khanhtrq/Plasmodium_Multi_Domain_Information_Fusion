@@ -19,7 +19,7 @@ parser.add_argument("--cls_model", type=str, help="path to config file")
 parser.add_argument("--cls_pretrained", type=str, help="path to cls_model cls_pretrained (trained parameteres) pt file")
 parser.add_argument("--annot_file", type=str)
 parser.add_argument('--num_classes', type=int, default= 7, help="Number of class for confusion matrix")
-parser.add_argument("--data", type=str, help="path to data")
+parser.add_argument("--data_root", type=str, help="path to data")
 
 
 parser.add_argument("--cls_batch_size", type=int, default=32, help="batch size")
@@ -30,7 +30,7 @@ args = parser.parse_args()
 
 config = Config.fromfile(args.cls_model)
 
-data = args.data
+data_root = args.data_root
 batch_size = config.batch_size
 
 # print(config.data_root)
@@ -46,7 +46,7 @@ gt_labels = np.zeros(len(lines), dtype=int)
 
 for i, line in enumerate(lines):
     img_path, gt_label = line.split(' ')
-    img_paths.append(os.path.join(data, img_path))
+    img_paths.append(os.path.join(data_root, img_path))
     gt_labels[i] = int(gt_label)
 
 inferencer = ImageClassificationInferencer(
