@@ -40,13 +40,12 @@ with open(os.path.join(data_root, args.annot_file), 'r') as f:
 # print(lines[0])
 
 img_paths = []
-gt_labels = []
-pred_labels = []
+gt_labels = np.zeros(len(lines), dtype=int)
 
 for i, line in enumerate(lines):
     img_path, gt_label = line.split(' ')
     img_paths.append(os.path.join(data_root, img_path))
-    gt_labels.append(int(gt_label))
+    gt_labels[i] = int(gt_label)
 
 inferencer = ImageClassificationInferencer(
     model = args.cls_model,
@@ -57,7 +56,10 @@ cls_results = inferencer(inputs = img_paths,
                         show_dir = './visualize/',
                         batch_size=args.cls_batch_size)
 
-pred_labels = [cls_results[i]['pred_label'] for i in range(len(cls_results))]
+pred_labels = np.zeros(len(cls_results), dtype=int)
+for i in range(len(cls_results)):
+    pred_labels[i] = cls_results[i]['pred_label']
+
 
 confusion_matrix = ConfusionMatrix.calculate(pred= pred_labels, target= gt_labels, num_classes= args.num_classes)
 acc = Accuracy.calculate(pred=pred_labels, target=gt_labels)
