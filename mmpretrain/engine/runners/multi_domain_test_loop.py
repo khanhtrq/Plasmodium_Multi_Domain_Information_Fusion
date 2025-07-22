@@ -134,7 +134,8 @@ class MultiDomainTestLoop(TestLoop):
         #           with the method to identify samples of difficult
         #   TASK May 26: Format of the variable outputs
         # ---------
-
+        
+        '''
         print("OUTPUT IS HERE. SEE?")
         print(type(outputs))
         print(type(outputs[0]))
@@ -153,6 +154,7 @@ class MultiDomainTestLoop(TestLoop):
         outputs[0].set_metainfo({'num_classes': 6})
 
         print(outputs)
+        '''
 
         # End
         # ----------

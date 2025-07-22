@@ -21,10 +21,16 @@ class MinorityMetrics(BaseMetric):
     def __init__(self,
                  num_classes: Optional[int] = None,
                  collect_device: str = 'cpu',
-                 prefix: Optional[str] = None) -> None:
+                 prefix: Optional[str] = None,
+                 class_name: list = None) -> None:
         
         super().__init__(collect_device, prefix)
         self.num_classes = num_classes #num_classes
+
+        if class_name is None:
+            self.class_name = CLASS_NAMES
+        else:
+            self.class_name = class_name
 
     def process(self, data_batch, data_samples: Sequence[dict]) -> None:
         for data_sample in data_samples:
@@ -61,8 +67,8 @@ class MinorityMetrics(BaseMetric):
             precision_i = true_positives / (true_positives + false_positives) if (true_positives + false_positives) != 0 else 0
             recall_i = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) != 0 else 0
             
-            precision_recall_metrics['precision/{}'.format(CLASS_NAMES[i])] = precision_i
-            precision_recall_metrics['recall/{}'.format(CLASS_NAMES[i])] = recall_i
+            precision_recall_metrics['precision/{}'.format(self.class_name[i])] = precision_i
+            precision_recall_metrics['recall/{}'.format(self.class_name[i])] = recall_i
         
         parasitized_correct = 0
         parasitized_recall = 0
@@ -77,8 +83,10 @@ class MinorityMetrics(BaseMetric):
 
         return precision_recall_metrics
     
-    @staticmethod
-    def compute_metrics_from_matrix(confusion_matrix, num_classes):
+    def compute_metrics_from_matrix(confusion_matrix, num_classes, class_name = None):
+        if class_name is None:
+            class_name = CLASS_NAMES
+
         precision_recall_metrics = {}
         for i in range(num_classes):
             true_positives = confusion_matrix[i, i]
@@ -89,8 +97,8 @@ class MinorityMetrics(BaseMetric):
             precision_i = true_positives / (true_positives + false_positives) if (true_positives + false_positives) != 0 else 0
             recall_i = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) != 0 else 0
             
-            precision_recall_metrics['precision/{}'.format(CLASS_NAMES[i])] = float(precision_i)
-            precision_recall_metrics['recall/{}'.format(CLASS_NAMES[i])] = float(recall_i)
+            precision_recall_metrics['precision/{}'.format(class_name[i])] = float(precision_i)
+            precision_recall_metrics['recall/{}'.format(class_name[i])] = float(recall_i)
         
         parasitized_correct = 0
         parasitized_recall = 0
