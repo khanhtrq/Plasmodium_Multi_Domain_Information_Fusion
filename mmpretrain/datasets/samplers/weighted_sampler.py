@@ -101,7 +101,10 @@ class MalariaWeightedRandomSampler(Sampler):
         class_counts = np.bincount(labels)
         self.class_weights = 1.0 / class_counts
         # Modify weight of last two classes (other and difficult)
-        self.class_weights[:-2] = self.class_weights[:-2] / 20
+        # July 22, 2025: Incorrectly modify class weight? 
+        # self.class_weights[:-2] = self.class_weights[:-2] / 20
+        self.class_weights[5:] = self.class_weights[5:] / 20
+        
         # Which values for their weights are suitable? 
 
         # labels = np.array([self.dataset[i]['data_samples'].gt_label.item() for i in range(len(self.dataset))])
