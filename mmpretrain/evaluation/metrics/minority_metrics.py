@@ -81,6 +81,10 @@ class MinorityMetrics(BaseMetric):
         precision_recall_metrics['precision/parasitized'] = parasitized_correct / parasitized_precision
         precision_recall_metrics['recall/parasitized'] = parasitized_correct / parasitized_recall
 
+        p = parasitized_correct / parasitized_precision
+        r = parasitized_correct / parasitized_recall
+        precision_recall_metrics['f1/parasitized'] = 2*p*r/(p+r)
+
         return precision_recall_metrics
     
     def compute_metrics_from_matrix(confusion_matrix, num_classes, class_name = None):

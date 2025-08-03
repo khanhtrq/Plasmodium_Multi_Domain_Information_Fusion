@@ -79,6 +79,11 @@ class MultiDomainValLoop(ValLoop):
             accuracy.append(metrics_all['{}/{}'.format(domain_name, 'accuracy/top1')])
         metrics_all['average/accuracy/top1'] = float(np.mean(accuracy))
         
+        f1 = []
+        for domain_name in self.domain_names:
+            f1.append(metrics_all['{}/{}'.format(domain_name, 'f1/parasitized')])
+        metrics_all['average/f1/parasitized'] = float(np.mean(f1))
+
         # Original ValLoop implementation
         if self.val_loss:
             loss_dict = _parse_losses(self.val_loss, 'val')
