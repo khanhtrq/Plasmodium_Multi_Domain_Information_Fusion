@@ -110,7 +110,8 @@ for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
 
     classification_results = inferencer(inputs = input_images,
                                         show_dir = './visualize/',
-                                        batch_size=args.cls_batch_size)
+                                        batch_size=args.cls_batch_size,
+                                        return_datasamples=True)
     
     txt_file = [f for f in os.listdir(os.path.join(detection_save_dir, "labels")) if f.startswith(rbc_folder)][0]
     cell_detection_result_file = os.path.join(txt_result_dir, txt_file)
@@ -126,6 +127,7 @@ for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
 
     #list of predictions to compute confusion matrix
     pred_conf = []
+    image_path = []
     
     # format: [class] [x_center] [y_center] [width] [height] [confidence] 
     for i, line in enumerate(lines):
@@ -136,8 +138,12 @@ for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
         # <class_name> <confidence> <left> <top> <right> <bottom>      
         x1, y1 = max(0, x_center - w // 2), max(0, y_center - h // 2)
         x2, y2 = min(width, x_center + w // 2), min(height, y_center + h // 2)
-        cls_class_name = classification_results[i]['pred_label']
-        pred_score = classification_results[i]['pred_score']
+        # cls_class_name = classification_results[i]['pred_label']
+        # pred_score = classification_results[i]['pred_score']
+
+        cls_class_name = classification_results[i].pred_label
+        pred_score = classification_results[i].pred_score
+        image_path.append(classification_results[i].metainfo['img_path'])
 
         if args.merge_healthy_other:
             # if label == other then label = healthy
