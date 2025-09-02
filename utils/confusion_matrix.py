@@ -40,13 +40,14 @@ class DetectionConfusionMatrix:
         self.CONF_THRESHOLD = CONF_THRESHOLD
         self.IOU_THRESHOLD = IOU_THRESHOLD
 
-    def process_batch(self, detections, labels: np.ndarray):
+    def process_batch(self, detections, labels: np.ndarray, input_images):
         """
         Return intersection-over-union (Jaccard index) of boxes.
         Both sets of boxes are expected to be in (x1, y1, x2, y2) format.
         Arguments:
             detections (Array[N, 6]), x1, y1, x2, y2, conf, class
             labels (Array[M, 5]), class, x1, y1, x2, y2
+            input_images: list of image paths
         Returns:
             None, updates confusion matrix accordingly
         """

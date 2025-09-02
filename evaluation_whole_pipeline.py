@@ -164,7 +164,7 @@ for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
         gt_conf.append([gt_label, x1, y1, x2, y2])
     gt_conf = np.array(gt_conf, dtype = object)
 
-    detection_conf_obj.process_batch(pred_conf, gt_conf)
+    detection_conf_obj.process_batch(pred_conf, gt_conf, input_images)
 
     #Save the refined result
     with open(cls_detection_result, "w") as refined_file:
@@ -172,6 +172,10 @@ for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
            refined_file.write(line)
 
 detection_conf = detection_conf_obj.return_matrix()
+image_path = detection_conf_obj.return_image_path()
+print(image_path)
+with open(os.path.join(args.save_dir, 'iamge_path.json'), 'w') as f:
+    json.dump(image_path, f, indent=4)
 
 pr_metrics = detection_conf_obj.compute_PR_from_matrix(detection_conf)
 
