@@ -202,40 +202,34 @@ class MultiDomainTestLoop(TestLoop):
                                 # print("IMAGE PATH AFTER BEING REPLACED:", img_path)
                                 img_path = img_path.split('/')
 
-                                if (self.domain_names[domain_idx] == 'OurPlasmodium') and (self.blood_smear_data_path is not None):
-                                    blood_img_path = os.path.join(self.blood_smear_data_path, 
-                                                                img_path[-4], 'images', img_path[-3] + '.*')
-                                    blood_img_name = img_path[-3]
-                                    blood_img_path = glob.glob(blood_img_path)[0]
+                                blood_img_path = os.path.join(self.blood_smear_data_path, 
+                                                            img_path[-4], 'images', img_path[-3] + '.*')
+                                blood_img_name = img_path[-3]
+                                blood_img_path = glob.glob(blood_img_path)[0]
 
-                                    # print(img_path)
-                                    # print(blood_img_path)
-                                    blood_img = cv2.imread(blood_img_path)
-                                    text = 'Label: {}, Predicted: {}, Image: {}'.format(CLASS_NAMES[gt], 
-                                                                            CLASS_NAMES[pred],
-                                                                            img_path[-3])
-                                    # Draw bounding box around cell
-                                    with open(box_path, 'r') as file:
-                                        content = file.read()
-                                    location = content.split(' ')[:-1]
-                                    location = [int(float(loc)) for loc in location]
-                                    x1, y1, x2, y2 = location
-                                    cv2.rectangle(blood_img, (x1, y1), (x2, y2), (0, 0, 255), 3)
+                                # print(img_path)
+                                # print(blood_img_path)
+                                blood_img = cv2.imread(blood_img_path)
+                                text = 'Label: {}, Predicted: {}, Image: {}'.format(CLASS_NAMES[gt], 
+                                                                        CLASS_NAMES[pred],
+                                                                        img_path[-3])
+                                # Draw bounding box around cell
+                                with open(box_path, 'r') as file:
+                                    content = file.read()
+                                location = content.split(' ')[:-1]
+                                location = [int(float(loc)) for loc in location]
+                                x1, y1, x2, y2 = location
+                                cv2.rectangle(blood_img, (x1, y1), (x2, y2), (0, 0, 255), 3)
 
 
-                                    img = concat_images(blood_img, cell_img, text= text)
-                                    counter = 1
+                                img = concat_images(blood_img, cell_img, text= text)
+                                counter = 1
+                                saved_path = os.path.join(path_blood_smear, '{}_{}.jpg'.format(blood_img_name, counter))
+                                while os.path.exists(saved_path):
+                                    counter += 1
                                     saved_path = os.path.join(path_blood_smear, '{}_{}.jpg'.format(blood_img_name, counter))
-                                    while os.path.exists(saved_path):
-                                        counter += 1
-                                        saved_path = os.path.join(path_blood_smear, '{}_{}.jpg'.format(blood_img_name, counter))
 
-                                    cv2.imwrite(saved_path, img)                           
-
-                                elif self.domain_names[domain_idx] == 'BBBC041':
-                                    pass
-                                elif self.domain_names[domain_idx] == 'IMLMalaria':
-                                    pass
+                                cv2.imwrite(saved_path, img)                           
 
                             # if (gt == pred) and (gt == 4) and (i == 30):
                             #     break 
