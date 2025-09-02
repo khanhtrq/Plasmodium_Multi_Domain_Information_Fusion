@@ -40,6 +40,8 @@ class DetectionConfusionMatrix:
         self.CONF_THRESHOLD = CONF_THRESHOLD
         self.IOU_THRESHOLD = IOU_THRESHOLD
 
+        self.image_path = {i:{j: [] for j in range(num_classes)} for i in range(num_classes)}
+
     def process_batch(self, detections, labels: np.ndarray, input_images):
         """
         Return intersection-over-union (Jaccard index) of boxes.
@@ -85,6 +87,9 @@ class DetectionConfusionMatrix:
             if all_matches.shape[0] > 0 and all_matches[all_matches[:, 0] == i].shape[0] == 1:
                 detection_class = detection_classes[int(all_matches[all_matches[:, 0] == i, 1][0])]
                 self.matrix[gt_class, detection_class] += 1
+
+                # Save image path: 
+                self.image_path[gt_class][detection_class].append(input_images[i])
             else:
                 self.matrix[gt_class, self.num_classes] += 1
 
@@ -95,6 +100,9 @@ class DetectionConfusionMatrix:
 
     def return_matrix(self):
         return self.matrix
+
+    def return_image_path(self):
+        return self.image_path
 
     def print_matrix(self):
         for i in range(self.num_classes + 1):
