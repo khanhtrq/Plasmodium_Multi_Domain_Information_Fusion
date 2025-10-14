@@ -143,7 +143,7 @@ for rbc_folder in os.listdir(os.path.join(detection_save_dir, 'crop')):
 
         cls_class_name = classification_results[i].pred_label
         pred_score = classification_results[i].pred_score
-        image_path.append(classification_results[i].metainfo['img_path'])
+        image_path.append(classification_results[i].metainfo['filename'])
 
         if args.merge_healthy_other:
             # if label == other then label = healthy
