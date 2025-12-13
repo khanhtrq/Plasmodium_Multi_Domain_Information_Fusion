@@ -65,7 +65,7 @@ for rbc_folder in os.listdir(args.extraction_folder):
 
 
     for feature in features:
-        print(feature.shape)
+        print(features[0][0].shape)
     
     break
 
