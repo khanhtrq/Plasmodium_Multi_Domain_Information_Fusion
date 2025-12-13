@@ -63,6 +63,7 @@ class MultiDomainClassifier(ImageClassifier):
             return x
         # print('MODE IN EXTRACT FEATURE FUNCTION:', mode)
         if self.with_neck:
+            print("MODE OF THE MODEL:", self.mode)
             x = self.neck(x, mode=mode, domain_idx = domain_idx,
                           data_samples = data_samples)
         if stage == 'neck':
