@@ -62,7 +62,7 @@ txt_something = os.path.join(args.extraction_folder, "labels")
 
 extracted_features = extractor(inputs = image_names,
                             batch_size=args.cls_batch_size,
-                            mode = 'test')
+                            mode = 'predict')
 
 print("Type of feature:", type(extracted_features))
 print("Type of feature [0]:", type(extracted_features[0]))
