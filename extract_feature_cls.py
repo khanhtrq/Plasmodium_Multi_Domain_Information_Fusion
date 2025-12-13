@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 import json
 import torch
-from mmpretrain.apis import FeatureExtractor
+from mmpretrain.apis import FeatureExtractor, ImageClassificationInferencer
 from pathlib import Path
 from utils.confusion_matrix import DetectionConfusionMatrix
 
@@ -40,6 +40,11 @@ args = parser.parse_args()
 # CLASSIFICATION
 # ---------------
 
+inferencer = ImageClassificationInferencer(
+    model = args.cls_model,
+    pretrained = args.cls_pretrained,
+    device='cuda')
+
 data_root = args.data_root
 image_names = []
 labels = []
@@ -59,6 +64,9 @@ extractor = FeatureExtractor(
     pretrained = args.cls_pretrained,
     device='cuda')
 txt_something = os.path.join(args.extraction_folder, "labels")
+
+results = inferencer(inputs = image_names,
+                            batch_size=args.cls_batch_size)
 
 extracted_features = extractor(inputs = image_names,
                             batch_size=args.cls_batch_size,
