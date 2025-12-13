@@ -125,7 +125,7 @@ class ImageClassifier(BaseClassifier):
         else:
             raise RuntimeError(f'Invalid mode "{mode}".')
 
-    def extract_feat(self, inputs, stage='neck'):
+    def extract_feat(self, inputs, stage='neck', **kwargs):
         """Extract features from the input tensor with shape (N, C, ...).
 
         Args:
