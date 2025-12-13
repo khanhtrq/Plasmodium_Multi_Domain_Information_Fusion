@@ -75,6 +75,11 @@ for feature in extracted_features:
 print("Length of labels:", len(labels))
 print("Length of extracted_features:", len(feature_list))
 
+feature_list = np.array(feature_list)
+labels = np.array(labels)
+print(feature_list.shape)
+print(labels.shape)
+
 exit()
 
 for rbc_folder in os.listdir(args.extraction_folder):
