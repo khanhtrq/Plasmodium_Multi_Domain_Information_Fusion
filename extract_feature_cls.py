@@ -50,7 +50,6 @@ for rbc_folder in os.listdir(args.extraction_folder):
     folder_path = os.path.join(args.extraction_folder, rbc_folder)
     input_images = []
     for root, _, files in os.walk(folder_path):        
-        files.sort(key=lambda x: int(x.split('.')[0]))
         for file in files:
             input_images.append(os.path.abspath(os.path.join(root, file)))
 
