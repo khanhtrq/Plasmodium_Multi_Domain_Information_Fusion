@@ -56,8 +56,15 @@ for rbc_folder in os.listdir(args.extraction_folder):
 
     features = extractor(inputs = input_images,
                                 batch_size=args.cls_batch_size)
+    
+    print("RBC folder:", rbc_folder)
+    print("Type of feature:", type(features))
+    print("Type of feature [0]:", type(features[0]))
+
     for feature in features:
         print(feature.shape)
+    
+    break
 
     '''
     txt_file = [f for f in os.listdir(os.path.join(detection_save_dir, "labels")) if f.startswith(rbc_folder)][0]
