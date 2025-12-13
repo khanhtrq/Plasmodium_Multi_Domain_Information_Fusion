@@ -75,10 +75,14 @@ for feature in extracted_features:
 print("Length of labels:", len(labels))
 print("Length of extracted_features:", len(feature_list))
 
-feature_list = np.array(feature_list)
+feature_arr = np.array(feature_list)
 labels = np.array(labels)
-print(feature_list.shape)
+print(feature_arr.shape)
 print(labels.shape)
+
+print(f"Feature max:{feature_arr.max()}, min:{feature_arr.min()}, mean: {feature_arr.mean()}")
+np.save(os.path.join(args.save_dir, "features.npy"), feature_arr)
+np.save(os.path.join(args.save_dir, "labels.npy"), labels)
 
 exit()
 
