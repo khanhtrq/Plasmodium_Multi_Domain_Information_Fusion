@@ -51,7 +51,8 @@ for rbc_folder in os.listdir(args.extraction_folder):
     input_images = []
     for root, _, files in os.walk(folder_path):        
         for file in files:
-            input_images.append(os.path.abspath(os.path.join(root, file)))
+            if file.lower().endswith(".jpg"):
+                input_images.append(os.path.abspath(os.path.join(root, file)))
 
     features = extractor(inputs = input_images,
                                 show_dir = './visualize/',
