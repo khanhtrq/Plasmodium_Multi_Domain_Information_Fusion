@@ -40,6 +40,7 @@ args = parser.parse_args()
 # CLASSIFICATION
 # ---------------
 
+data_root = args.data_root
 image_names = []
 cls_idx = []
 with open(args.annotation_file, "r") as file:
@@ -48,7 +49,7 @@ for i, line in enumerate(lines):
     parts = line.strip().split()
     image_file_i, cls_idx_i = parts[0], int(parts[1])
 
-    image_names.append(image_file_i)
+    image_names.append(os.path.join(data_root, image_file_i))
     cls_idx.append(cls_idx_i)
 
 extractor = FeatureExtractor(
