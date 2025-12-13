@@ -25,7 +25,7 @@ parser.add_argument('--iou_threshold', type=float, default=0.5, help="IoU thresh
 
 parser.add_argument("--extraction_folder", type=str, help= "Directory to save confusion matrix.")
 
-
+parser.add_argument("--save_dir", type=str, help= "Directory to save confusion matrix.")
 parser.add_argument("--cls_batch_size", type=int, default=32, help="batch size")
 
 parser.add_argument('--merge_healthy_other', type=bool, default=False, help="Merge Healthy and Other class for evaluation")
