@@ -42,7 +42,9 @@ args = parser.parse_args()
 
 data_root = args.data_root
 image_names = []
-cls_idx = []
+labels = []
+feature_list = []
+
 with open(args.annotation_file, "r") as file:
     lines = file.readlines()
 for i, line in enumerate(lines):
@@ -50,7 +52,7 @@ for i, line in enumerate(lines):
     image_file_i, cls_idx_i = parts[0], int(parts[1])
 
     image_names.append(os.path.join(data_root, image_file_i))
-    cls_idx.append(cls_idx_i)
+    labels.append(cls_idx_i)
 
 extractor = FeatureExtractor(
     model = args.cls_model,
@@ -58,18 +60,22 @@ extractor = FeatureExtractor(
     device='cuda')
 txt_something = os.path.join(args.extraction_folder, "labels")
 
-features = extractor(inputs = image_names,
+extracted_features = extractor(inputs = image_names,
                             batch_size=args.cls_batch_size)
 
-print("Type of feature:", type(features))
-print("Type of feature [0]:", type(features[0]))
-print("Length of feature [0]:", len(features[0]))
-print("Type of feature [0][0]:", type(features[0][0]))
+print("Type of feature:", type(extracted_features))
+print("Type of feature [0]:", type(extracted_features[0]))
+print("Length of feature [0]:", len(extracted_features[0]))
+print("Type of feature [0][0]:", type(extracted_features[0][0]))
 
 
-for feature in features:
-    print(features[0][0].shape)
+for feature in extracted_features:
+    print(extracted_features[0][0].shape)
+    feature_list.append(feature[0].cpu().numpy())
     break
+
+print("Length of labels:", len(labels))
+print("Length of extracted_features:", len(feature_list))
 
 exit()
 
@@ -82,18 +88,18 @@ for rbc_folder in os.listdir(args.extraction_folder):
             if file.lower().endswith(".jpg"):
                 input_images.append(os.path.abspath(os.path.join(root, file)))
 
-    features = extractor(inputs = input_images,
+    extracted_features = extractor(inputs = input_images,
                                 batch_size=args.cls_batch_size)
     
     print("RBC folder:", rbc_folder)
-    print("Type of feature:", type(features))
-    print("Type of feature [0]:", type(features[0]))
-    print("Length of feature [0]:", len(features[0]))
-    print("Type of feature [0][0]:", type(features[0][0]))
+    print("Type of feature:", type(extracted_features))
+    print("Type of feature [0]:", type(extracted_features[0]))
+    print("Length of feature [0]:", len(extracted_features[0]))
+    print("Type of feature [0][0]:", type(extracted_features[0][0]))
 
 
-    for feature in features:
-        print(features[0][0].shape)
+    for feature in extracted_features:
+        print(extracted_features[0][0].shape)
         break
     
     '''
