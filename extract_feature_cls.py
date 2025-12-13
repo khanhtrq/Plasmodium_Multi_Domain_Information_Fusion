@@ -72,6 +72,7 @@ extracted_features = extractor(inputs = image_names,
                             batch_size=args.cls_batch_size,
                             mode = 'predict',
                             # stage = 'neck'
+                            domain_idx = 0,
                             )
 
 print("Type of feature:", type(extracted_features))
