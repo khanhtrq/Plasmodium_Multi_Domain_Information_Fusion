@@ -70,8 +70,9 @@ results = inferencer(inputs = image_names,
 
 extracted_features = extractor(inputs = image_names,
                             batch_size=args.cls_batch_size,
-                            mode = 'predict',
-                            stage = 'neck')
+                            # mode = 'predict',
+                            # stage = 'neck'
+                            )
 
 print("Type of feature:", type(extracted_features))
 print("Type of feature [0]:", type(extracted_features[0]))
