@@ -66,9 +66,8 @@ for rbc_folder in os.listdir(args.extraction_folder):
 
     for feature in features:
         print(features[0][0].shape)
+        break
     
-    break
-
     '''
     txt_file = [f for f in os.listdir(os.path.join(detection_save_dir, "labels")) if f.startswith(rbc_folder)][0]
     cell_detection_result_file = os.path.join(txt_result_dir, txt_file)
