@@ -60,6 +60,9 @@ for rbc_folder in os.listdir(args.extraction_folder):
     print("RBC folder:", rbc_folder)
     print("Type of feature:", type(features))
     print("Type of feature [0]:", type(features[0]))
+    print("Length of feature [0]:", len(features[0]))
+    print("Type of feature [0][0]:", type(features[0][0]))
+
 
     for feature in features:
         print(feature.shape)
