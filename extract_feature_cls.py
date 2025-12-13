@@ -55,8 +55,7 @@ for rbc_folder in os.listdir(args.extraction_folder):
                 input_images.append(os.path.abspath(os.path.join(root, file)))
 
     features = extractor(inputs = input_images,
-                                batch_size=args.cls_batch_size,
-                                return_datasamples=True)
+                                batch_size=args.cls_batch_size)
     for feature in features:
         print(feature.shape)
 
