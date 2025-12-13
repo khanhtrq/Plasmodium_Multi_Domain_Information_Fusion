@@ -30,6 +30,7 @@ parser.add_argument("--cls_batch_size", type=int, default=32, help="batch size")
 parser.add_argument('--num_classes', type=int, default= 7, help="Number of classes for confusion matrix")
 
 parser.add_argument("--annotation_file", type=str)
+parser.add_argument("--data_root", type=str)
 
 
 
@@ -41,7 +42,7 @@ args = parser.parse_args()
 
 image_names = []
 cls_idx = []
-with open(os.path.join(args.annotation_file), "r") as file:
+with open(args.annotation_file, "r") as file:
     lines = file.readlines()
 for i, line in enumerate(lines):
     parts = line.strip().split()
