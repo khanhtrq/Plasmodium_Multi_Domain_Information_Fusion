@@ -40,11 +40,6 @@ args = parser.parse_args()
 # CLASSIFICATION
 # ---------------
 
-inferencer = ImageClassificationInferencer(
-    model = args.cls_model,
-    pretrained = args.cls_pretrained,
-    device='cuda')
-
 data_root = args.data_root
 image_names = []
 labels = []
@@ -65,14 +60,10 @@ extractor = FeatureExtractor(
     device='cuda')
 txt_something = os.path.join(args.extraction_folder, "labels")
 
-results = inferencer(inputs = image_names,
-                            batch_size=args.cls_batch_size)
-
 extracted_features = extractor(inputs = image_names,
                             batch_size=args.cls_batch_size,
                             mode = 'predict',
                             # stage = 'neck'
-                            domain_idx = 0,
                             )
 
 print("Type of feature:", type(extracted_features))

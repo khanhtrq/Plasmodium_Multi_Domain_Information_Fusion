@@ -56,7 +56,10 @@ class MultiDomainClassifier(ImageClassifier):
         assert stage in ['backbone', 'neck', 'pre_logits'], \
             (f'Invalid output stage "{stage}", please choose from "backbone", '
              '"neck" and "pre_logits"')
-
+        
+        if domain_idx is None:
+            domain_idx = self.domain_idx
+            
         x = self.backbone(inputs)
 
         if stage == 'backbone':
