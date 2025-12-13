@@ -70,7 +70,6 @@ print("Type of feature [0][0]:", type(extracted_features[0][0]))
 
 
 for feature in extracted_features:
-    print(extracted_features[0][0].shape)
     feature_list.append(feature[0].cpu().numpy())
 
 print("Length of labels:", len(labels))
