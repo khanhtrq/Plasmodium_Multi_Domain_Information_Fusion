@@ -70,7 +70,7 @@ results = inferencer(inputs = image_names,
 
 extracted_features = extractor(inputs = image_names,
                             batch_size=args.cls_batch_size,
-                            # mode = 'predict',
+                            mode = 'predict',
                             # stage = 'neck'
                             )
 
