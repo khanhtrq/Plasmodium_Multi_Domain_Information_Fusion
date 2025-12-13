@@ -42,7 +42,7 @@ extractor = FeatureExtractor(
     model = args.cls_model,
     pretrained = args.cls_pretrained,
     device='cuda')
-txt_ = os.path.join(args.rbc_folder, "labels")
+txt_something = os.path.join(args.extraction_folder, "labels")
 
 
 for rbc_folder in os.listdir(args.extraction_folder):
