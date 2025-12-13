@@ -29,7 +29,7 @@ parser.add_argument("--cls_batch_size", type=int, default=32, help="batch size")
 
 parser.add_argument('--num_classes', type=int, default= 7, help="Number of classes for confusion matrix")
 
-parser.add_argument("--annotation_folder", type=str)
+parser.add_argument("--annotation_file", type=str)
 
 
 
@@ -41,17 +41,14 @@ args = parser.parse_args()
 
 image_names = []
 cls_idx = []
-for annot_file in os.listdir(args.annotation_folder):
-    with open(os.path.join(args.annotation_folder, annot_file), "r") as file:
-        lines = file.readlines()
-    for i, line in enumerate(lines):
-        parts = line.strip().split()
-        image_file_i, cls_idx_i = parts[0], int(parts[1])
+with open(os.path.join(args.annotation_file), "r") as file:
+    lines = file.readlines()
+for i, line in enumerate(lines):
+    parts = line.strip().split()
+    image_file_i, cls_idx_i = parts[0], int(parts[1])
 
-        image_names.append(image_file_i)
-        cls_idx.append(cls_idx_i)
-
-        pass
+    image_names.append(image_file_i)
+    cls_idx.append(cls_idx_i)
 
 extractor = FeatureExtractor(
     model = args.cls_model,
