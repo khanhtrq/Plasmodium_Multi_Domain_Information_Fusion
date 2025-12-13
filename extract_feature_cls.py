@@ -1,11 +1,10 @@
-from ultralytics import YOLO
 import argparse
 import os
 import cv2
 import numpy as np
 import json
 import torch
-from mmpretrain.apis import ImageClassificationextractor, FeatureExtractor
+from mmpretrain.apis import FeatureExtractor
 from pathlib import Path
 from utils.confusion_matrix import DetectionConfusionMatrix
 
@@ -28,7 +27,6 @@ parser.add_argument("--extraction_folder", type=str, help= "Directory to save co
 parser.add_argument("--save_dir", type=str, help= "Directory to save confusion matrix.")
 parser.add_argument("--cls_batch_size", type=int, default=32, help="batch size")
 
-parser.add_argument('--merge_healthy_other', type=bool, default=False, help="Merge Healthy and Other class for evaluation")
 parser.add_argument('--num_classes', type=int, default= 7, help="Number of classes for confusion matrix")
 
 
