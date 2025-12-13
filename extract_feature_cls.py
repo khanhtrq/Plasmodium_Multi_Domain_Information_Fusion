@@ -29,6 +29,7 @@ parser.add_argument("--cls_batch_size", type=int, default=32, help="batch size")
 
 parser.add_argument('--num_classes', type=int, default= 7, help="Number of classes for confusion matrix")
 
+parser.add_argument("--annotation_folder", type=str)
 
 
 
@@ -38,12 +39,40 @@ args = parser.parse_args()
 # CLASSIFICATION
 # ---------------
 
+image_names = []
+cls_idx = []
+for annot_file in os.listdir(args.annotation_folder):
+    with open(os.path.join(args.annotation_folder, annot_file), "r") as file:
+        lines = file.readlines()
+    for i, line in enumerate(lines):
+        parts = line.strip().split()
+        image_file_i, cls_idx_i = parts[0], int(parts[1])
+
+        image_names.append(image_file_i)
+        cls_idx.append(cls_idx_i)
+
+        pass
+
 extractor = FeatureExtractor(
     model = args.cls_model,
     pretrained = args.cls_pretrained,
     device='cuda')
 txt_something = os.path.join(args.extraction_folder, "labels")
 
+features = extractor(inputs = image_names,
+                            batch_size=args.cls_batch_size)
+
+print("Type of feature:", type(features))
+print("Type of feature [0]:", type(features[0]))
+print("Length of feature [0]:", len(features[0]))
+print("Type of feature [0][0]:", type(features[0][0]))
+
+
+for feature in features:
+    print(features[0][0].shape)
+    break
+
+exit()
 
 for rbc_folder in os.listdir(args.extraction_folder):
 
