@@ -201,7 +201,7 @@ class MDIFClassLevel(BaseModule):
                 data_samples = None,
                 mode: str = 'loss',
                 domain_idx: int = None):
-        
+        print(f"Domain index in neck {domain_idx}")
         return self._forward_class_level(instance_node, data_samples, mode, domain_idx)
 
     def _forward_class_level(self, instance_node: torch.Tensor,
