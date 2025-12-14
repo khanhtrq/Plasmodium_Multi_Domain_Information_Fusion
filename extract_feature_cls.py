@@ -7,7 +7,11 @@ import torch
 from mmpretrain.apis import FeatureExtractor, ImageClassificationInferencer
 from pathlib import Path
 from utils.confusion_matrix import DetectionConfusionMatrix
+import matplotlib.pyplot as plt
+from sklearn import datasets
+from sklearn.manifold import TSNE
 
+from utils.tsne import tsne_visualize
 
 # Create argument parser
 parser = argparse.ArgumentParser(description="Parser for classification feature extraction")
@@ -69,5 +73,13 @@ print(labels.shape)
 print(f"Feature max:{feature_arr.max()}, min:{feature_arr.min()}, mean: {feature_arr.mean()}")
 np.save(os.path.join(args.save_dir, "features.npy"), feature_arr)
 np.save(os.path.join(args.save_dir, "labels.npy"), labels)
+
+X = feature_arr
+y = labels
+
+tsne_visualize(X[y != 4, :], y[y != 4], 
+               save_path= os.path.join(args.save_dir, "tsne_parasite.png"))
+tsne_visualize(X, y, 
+               save_path= os.path.join(args.save_dir, "all_parasite.png"))
 
 exit()
