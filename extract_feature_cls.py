@@ -53,24 +53,24 @@ extracted_features = extractor(inputs = image_names,
                             # stage = 'neck'
                             )
 
-print("Type of feature:", type(extracted_features))
-print("Type of feature [0]:", type(extracted_features[0]))
-print("Length of feature [0]:", len(extracted_features[0]))
-print("Type of feature [0][0]:", type(extracted_features[0][0]))
+# print("Type of feature:", type(extracted_features))
+# print("Type of feature [0]:", type(extracted_features[0]))
+# print("Length of feature [0]:", len(extracted_features[0]))
+# print("Type of feature [0][0]:", type(extracted_features[0][0]))
 
 
 for feature in extracted_features:
     feature_list.append(feature[0].cpu().numpy())
 
-print("Length of labels:", len(labels))
-print("Length of extracted_features:", len(feature_list))
+# print("Length of labels:", len(labels))
+# print("Length of extracted_features:", len(feature_list))
 
 feature_arr = np.array(feature_list)
 labels = np.array(labels)
-print(feature_arr.shape)
-print(labels.shape)
+# print(feature_arr.shape)
+# print(labels.shape)
 
-print(f"Feature max:{feature_arr.max()}, min:{feature_arr.min()}, mean: {feature_arr.mean()}")
+# print(f"Feature max:{feature_arr.max()}, min:{feature_arr.min()}, mean: {feature_arr.mean()}")
 np.save(os.path.join(args.save_dir, "features.npy"), feature_arr)
 np.save(os.path.join(args.save_dir, "labels.npy"), labels)
 
