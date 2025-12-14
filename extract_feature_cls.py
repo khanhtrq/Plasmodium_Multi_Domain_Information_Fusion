@@ -24,7 +24,6 @@ parser.add_argument("--save_dir", type=str, help= "Directory to save confusion m
 parser.add_argument("--cls_batch_size", type=int, default=32, help="batch size")
 parser.add_argument("--annotation_file", type=str)
 parser.add_argument("--data_root", type=str)
-parser.add_argument("--perplexity", type=float, default=30)
 
 
 args = parser.parse_args()
@@ -78,11 +77,12 @@ np.save(os.path.join(args.save_dir, "labels.npy"), labels)
 X = feature_arr
 y = labels
 
-tsne_visualize(X[y != 4, :], y[y != 4], 
-               save_path= os.path.join(args.save_dir, f"tsne_parasite_{args.perplexity}.png"),
-               perplexity=args.perplexity)
-tsne_visualize(X, y, 
-               save_path= os.path.join(args.save_dir, f"tsne_all_perplexity_{args.perplexity}.png"),
-               perplexity=args.perplexity)
+for perplexity in [5, 10, 15, 20, 30, 40, 50]:
+    tsne_visualize(X[y != 4, :], y[y != 4], 
+                save_path= os.path.join(args.save_dir, f"tsne_parasite_{perplexity}.png"),
+                perplexity=args.perplexity)
+    tsne_visualize(X, y, 
+                save_path= os.path.join(args.save_dir, f"tsne_all_perplexity_{perplexity}.png"),
+                perplexity=args.perplexity)
 
 exit()
