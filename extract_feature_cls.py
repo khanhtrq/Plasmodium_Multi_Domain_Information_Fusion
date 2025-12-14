@@ -79,10 +79,10 @@ X = feature_arr
 y = labels
 
 tsne_visualize(X[y != 4, :], y[y != 4], 
-               save_path= os.path.join(args.save_dir, "tsne_parasite.png"),
+               save_path= os.path.join(args.save_dir, f"tsne_parasite_{args.perplexity}.png"),
                perplexity=args.perplexity)
 tsne_visualize(X, y, 
-               save_path= os.path.join(args.save_dir, "tsne_all.png"),
+               save_path= os.path.join(args.save_dir, f"tsne_all_perplexity_{args.perplexity}.png"),
                perplexity=args.perplexity)
 
 exit()
