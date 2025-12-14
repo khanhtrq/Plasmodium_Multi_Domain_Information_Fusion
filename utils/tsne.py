@@ -19,7 +19,7 @@ def tsne_visualize(X, y,
     # n_components=2 for a 2D visualization
     # perplexity usually between 5 and 50
     # random_state for reproducibility
-    tsne = TSNE(n_components=2, perplexity=30, random_state=42)
+    tsne = TSNE(n_components=2, perplexity=5, random_state=42)
 
     # 3. Fit and transform the data
     # t-SNE only has a fit_transform method, not separate fit/transform methods
