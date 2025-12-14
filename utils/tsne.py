@@ -12,14 +12,15 @@ class_names = {
 }
 
 def tsne_visualize(X, y,
-                   save_path: str):
+                   save_path: str,
+                   perplexity = 30):
 
 
     # 2. Configure the t-SNE model
     # n_components=2 for a 2D visualization
     # perplexity usually between 5 and 50
     # random_state for reproducibility
-    tsne = TSNE(n_components=2, perplexity=5, random_state=42)
+    tsne = TSNE(n_components=2, perplexity=perplexity, random_state=42)
 
     # 3. Fit and transform the data
     # t-SNE only has a fit_transform method, not separate fit/transform methods
