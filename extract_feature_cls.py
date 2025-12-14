@@ -80,6 +80,6 @@ y = labels
 tsne_visualize(X[y != 4, :], y[y != 4], 
                save_path= os.path.join(args.save_dir, "tsne_parasite.png"))
 tsne_visualize(X, y, 
-               save_path= os.path.join(args.save_dir, "all_parasite.png"))
+               save_path= os.path.join(args.save_dir, "tsne_all.png"))
 
 exit()
