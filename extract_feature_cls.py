@@ -80,9 +80,9 @@ y = labels
 for perplexity in [5, 10, 15, 20, 30, 40, 50]:
     tsne_visualize(X[y != 4, :], y[y != 4], 
                 save_path= os.path.join(args.save_dir, f"tsne_parasite_{perplexity}.png"),
-                perplexity=args.perplexity)
+                perplexity=perplexity)
     tsne_visualize(X, y, 
                 save_path= os.path.join(args.save_dir, f"tsne_all_perplexity_{perplexity}.png"),
-                perplexity=args.perplexity)
+                perplexity=perplexity)
 
 exit()
