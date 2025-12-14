@@ -33,7 +33,7 @@ def tsne_visualize(X, y,
         plt.scatter(
             X_reduced[idx, 0],
             X_reduced[idx, 1],
-            s=10,
+            s=30,
             alpha=0.7,
             label=class_names.get(label, f"Class {label}")
         )
@@ -41,7 +41,7 @@ def tsne_visualize(X, y,
     # plt.title('t-SNE visualization of model features')
     plt.xlabel('t-SNE component 1')
     plt.ylabel('t-SNE component 2')
-    plt.legend(markerscale=2, fontsize=10)
+    plt.legend(markerscale=1, fontsize=10)
     plt.tight_layout()
 
     plt.savefig(save_path, dpi=300, bbox_inches="tight")
