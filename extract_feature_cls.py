@@ -78,7 +78,7 @@ X = feature_arr
 y = labels
 
 for perplexity in [5, 10, 15, 20, 30, 40, 50]:
-    tsne_visualize(X[y != 4, :], y[y != 4], 
+    tsne_visualize(X[y != 6, :], y[y != 6], 
                 save_path= os.path.join(args.save_dir, f"tsne_parasite_{perplexity}.png"),
                 perplexity=perplexity)
     tsne_visualize(X, y, 
