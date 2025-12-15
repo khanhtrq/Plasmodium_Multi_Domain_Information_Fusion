@@ -6,9 +6,11 @@ from sklearn.manifold import TSNE
 class_names = {
     0: "Ring",
     1: "Trophozoite",
-    2: "Schizont",
-    3: "Gametocyte",
-    4: "Healthy"
+    2: "Schizont 1",
+    3: "Schizont 2",
+    4: "Gametocyte 1",
+    5: "Gametocyte 2-5",
+    6: "Healthy"
 }
 
 def tsne_visualize(X, y,
