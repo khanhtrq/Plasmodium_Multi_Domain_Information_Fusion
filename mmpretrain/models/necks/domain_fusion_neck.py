@@ -374,8 +374,8 @@ class MDIFClassLevel(BaseModule):
             # Jan 8, 2024 experiment
             # Removing weight
             #-----------------------
-            # edge_weight = distance_inversed / distance_inversed.sum()
-            edge_weight = torch.ones_like(edge_weight)
+            # edge_weight = torch.ones_like(edge_weight)
+            edge_weight = distance_inversed / distance_inversed.sum()
             # ----------------------
 
 
@@ -475,8 +475,8 @@ class MDIFClassLevel(BaseModule):
             # Jan 8, 2024 experiment
             # Removing weight
             #-----------------------
-            # edge_weight = distance_inversed / distance_inversed.sum()
-            edge_weight = torch.ones_like(edge_weight)
+            # edge_weight = torch.ones_like(edge_weight)
+            edge_weight = distance_inversed / distance_inversed.sum()
             # ----------------------
 
 
