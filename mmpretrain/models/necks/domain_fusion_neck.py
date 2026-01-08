@@ -349,6 +349,13 @@ class MDIFClassLevel(BaseModule):
             distance_inversed = 1 / distance
             edge_weight = distance_inversed / distance_inversed.sum()
 
+            # Jan 8, 2024 experiment
+            # Removing weight
+            #-----------------------
+            # edge_weight = distance_inversed / distance_inversed.sum()
+            edge_weight = 1
+
+
             #This edge is not necessary
             # second_kn_graph[instance_idx, n_instances + class_idx*self.n_domains + domain_idx] = 1
             for i, c_idx in enumerate(agt_mask.nonzero().squeeze(dim = 1).cpu().numpy()):
@@ -441,6 +448,12 @@ class MDIFClassLevel(BaseModule):
             distance = distance[agt_mask]
             distance_inversed = 1 / distance
             edge_weight = distance_inversed / distance_inversed.sum()
+
+            # Jan 8, 2024 experiment
+            # Removing weight
+            #-----------------------
+            # edge_weight = distance_inversed / distance_inversed.sum()
+            edge_weight = 1
 
             for i, class_idx in enumerate(agt_mask.nonzero().squeeze(dim = 1).cpu().numpy()):
                 #Set values by normalized distance to agent nodes
