@@ -202,6 +202,8 @@ class MultiDomainTestLoop(TestLoop):
                                 # print("IMAGE PATH AFTER BEING REPLACED:", img_path)
                                 img_path = img_path.split('/')
 
+                                # commneted to run code Jan 2026
+                                '''
                                 blood_img_path = os.path.join(self.blood_smear_data_path, 
                                                             img_path[-4], 'images', img_path[-3] + '.*')
                                 blood_img_name = img_path[-3]
@@ -229,7 +231,8 @@ class MultiDomainTestLoop(TestLoop):
                                     counter += 1
                                     saved_path = os.path.join(path_blood_smear, '{}_{}.jpg'.format(blood_img_name, counter))
 
-                                cv2.imwrite(saved_path, img)                           
+                                cv2.imwrite(saved_path, img) 
+                                '''                          
 
                             # if (gt == pred) and (gt == 4) and (i == 30):
                             #     break 
