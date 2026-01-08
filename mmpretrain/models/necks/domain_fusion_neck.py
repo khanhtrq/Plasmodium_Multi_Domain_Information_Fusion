@@ -56,7 +56,7 @@ class MultiDomainInformationFusion(BaseModule):
 
         # Residual implementation Jan 2026
         # ------------------------------
-        instance_node_before_gcn = instance_node[0]
+        instance_node_before_gcn = instance_node
         # ------------------------------
 
         if mode == 'loss':
@@ -80,6 +80,7 @@ class MultiDomainInformationFusion(BaseModule):
         node_2nd = self.gcn_conv2(node_1st, second_edge_indicies)       
         
         instance_node_after_gcn = node_2nd[:-self.n_domains]
+
         # Residual implementation Jan 2026
         # ------------------------------
         print("SHAPE BEFORE RESIDUAL:", instance_node_after_gcn.shape, instance_node_before_gcn.shape)
