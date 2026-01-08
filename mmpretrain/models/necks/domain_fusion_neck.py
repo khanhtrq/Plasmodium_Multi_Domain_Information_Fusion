@@ -225,6 +225,11 @@ class MDIFClassLevel(BaseModule):
         #Global Average Pooling
         instance_node = self.gap(instance_node)
         instance_node = instance_node.view(instance_node.size(0), -1)
+
+        # Residual implementation Jan 2026
+        # ------------------------------
+        instance_node_before_gcn = instance_node
+        # ------------------------------
         
         if mode == 'loss':
             labels = np.array([data_sample.gt_label.item() for data_sample in data_samples])
@@ -254,9 +259,14 @@ class MDIFClassLevel(BaseModule):
         elif mode == 'predict':
             node_2nd = self.gcn_conv2(node_1st, second_edge_indicies, edge_weight = second_edge_weight)       
 
-        instance_node = node_2nd[:-self.n_domains*self.n_classes]
+        instance_node_after_gcn = node_2nd[:-self.n_domains*self.n_classes]
 
-        return tuple([instance_node])
+        # Residual implementation Jan 2026
+        # ------------------------------
+        instance_node_output = instance_node_after_gcn + instance_node_before_gcn
+        # ------------------------------
+
+        return tuple([instance_node_output])
     
     def agent_node_class_level(self, instance_node: torch.Tensor,
                                labels):
