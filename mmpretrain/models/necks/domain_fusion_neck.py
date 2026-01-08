@@ -83,10 +83,11 @@ class MultiDomainInformationFusion(BaseModule):
 
         # Residual implementation Jan 2026
         # ------------------------------
-        print("SHAPE BEFORE RESIDUAL:", instance_node_after_gcn.shape, instance_node_before_gcn.shape)
+        instance_node_output = instance_node_after_gcn + instance_node_before_gcn
+        print("SHAPE BEFORE RESIDUAL:", instance_node_output.shape, instance_node_before_gcn.shape)
         # ------------------------------
 
-        return tuple([instance_node_after_gcn])
+        return tuple([instance_node_output])
     
     def agent_node_domain_level(self, instance_node: torch.Tensor):
         '''
