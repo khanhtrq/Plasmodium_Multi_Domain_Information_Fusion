@@ -47,6 +47,11 @@ class MultiDomainInformationFusion(BaseModule):
                                 mode: str = 'loss',
                                 domain_idx: int = None):
         
+        # Residual implementation Jan 2026
+        # ------------------------------
+        instance_node_original = instance_node[0]
+        # ------------------------------
+        
         instance_node = instance_node[0]
 
         #Global Average Pooling
@@ -74,6 +79,10 @@ class MultiDomainInformationFusion(BaseModule):
         node_2nd = self.gcn_conv2(node_1st, second_edge_indicies)       
         
         instance_node = node_2nd[:-self.n_domains]
+        # Residual implementation Jan 2026
+        # ------------------------------
+        print("SHAPE BEFORE RESIDUAL:", instance_node.shape, instance_node_original.shape)
+        # ------------------------------
 
         return tuple([instance_node])
     
