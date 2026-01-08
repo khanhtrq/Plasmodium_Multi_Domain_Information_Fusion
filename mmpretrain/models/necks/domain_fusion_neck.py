@@ -263,8 +263,8 @@ class MDIFClassLevel(BaseModule):
 
         # Residual implementation Jan 2026
         # ------------------------------
-        # instance_node_output = instance_node_after_gcn + instance_node_before_gcn
-        # return tuple([instance_node_output])
+        instance_node_output = instance_node_after_gcn + instance_node_before_gcn
+        return tuple([instance_node_output])
         # ------------------------------
 
         return tuple([instance_node_after_gcn])
