@@ -47,16 +47,17 @@ class MultiDomainInformationFusion(BaseModule):
                                 mode: str = 'loss',
                                 domain_idx: int = None):
         
-        # Residual implementation Jan 2026
-        # ------------------------------
-        instance_node_original = instance_node[0]
-        # ------------------------------
 
         instance_node = instance_node[0]
 
         #Global Average Pooling
         instance_node = self.gap(instance_node)
         instance_node = instance_node.view(instance_node.size(0), -1)
+
+        # Residual implementation Jan 2026
+        # ------------------------------
+        instance_node_before_gcn = instance_node[0]
+        # ------------------------------
 
         if mode == 'loss':
             first_edge_indicies, second_edge_indicies = self.domain_graph_training(instance_node.shape[0])
@@ -81,7 +82,7 @@ class MultiDomainInformationFusion(BaseModule):
         instance_node = node_2nd[:-self.n_domains]
         # Residual implementation Jan 2026
         # ------------------------------
-        print("SHAPE BEFORE RESIDUAL:", instance_node.shape, instance_node_original.shape)
+        print("SHAPE BEFORE RESIDUAL:", instance_node.shape, instance_node_before_gcn.shape)
         # ------------------------------
 
         return tuple([instance_node])
