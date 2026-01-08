@@ -92,7 +92,7 @@ class MultiDomainTestLoop(TestLoop):
             metrics.update(loss_dict)
         
         #Copying false classification cases
-        metrics_all = self.save_false_classification(metrics_all)
+        # metrics_all = self.save_false_classification(metrics_all)
                                     
         self.runner.call_hook('after_test_epoch', metrics=metrics_all)
         self.runner.call_hook('after_test')
