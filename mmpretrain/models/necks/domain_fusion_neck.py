@@ -51,7 +51,7 @@ class MultiDomainInformationFusion(BaseModule):
         # ------------------------------
         instance_node_original = instance_node[0]
         # ------------------------------
-        
+
         instance_node = instance_node[0]
 
         #Global Average Pooling
@@ -362,7 +362,7 @@ class MDIFClassLevel(BaseModule):
             # Removing weight
             #-----------------------
             # edge_weight = distance_inversed / distance_inversed.sum()
-            edge_weight = 1
+            edge_weight = torch.ones_like(edge_weight)
 
 
             #This edge is not necessary
