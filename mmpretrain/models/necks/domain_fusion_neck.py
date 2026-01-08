@@ -263,10 +263,11 @@ class MDIFClassLevel(BaseModule):
 
         # Residual implementation Jan 2026
         # ------------------------------
-        instance_node_output = instance_node_after_gcn + instance_node_before_gcn
+        # instance_node_output = instance_node_after_gcn + instance_node_before_gcn
+        # return tuple([instance_node_output])
         # ------------------------------
 
-        return tuple([instance_node_output])
+        return tuple([instance_node_after_gcn])
     
     def agent_node_class_level(self, instance_node: torch.Tensor,
                                labels):
@@ -375,6 +376,7 @@ class MDIFClassLevel(BaseModule):
             #-----------------------
             # edge_weight = distance_inversed / distance_inversed.sum()
             edge_weight = torch.ones_like(edge_weight)
+            # ----------------------
 
 
             #This edge is not necessary
@@ -474,7 +476,9 @@ class MDIFClassLevel(BaseModule):
             # Removing weight
             #-----------------------
             # edge_weight = distance_inversed / distance_inversed.sum()
-            edge_weight = 1
+            edge_weight = torch.ones_like(edge_weight)
+            # ----------------------
+
 
             for i, class_idx in enumerate(agt_mask.nonzero().squeeze(dim = 1).cpu().numpy()):
                 #Set values by normalized distance to agent nodes
